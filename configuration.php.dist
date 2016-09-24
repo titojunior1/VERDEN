@@ -1,1 +1,8 @@
 <?php
+/* URL e CHAVE DE ACESSO KPL */
+
+define ('KPL_WSDL', '');
+define ('KPL_KEY', '');
+
+define ('MAGENTO_WSDL','');
+define ('MAGENTO_KEY', '');
