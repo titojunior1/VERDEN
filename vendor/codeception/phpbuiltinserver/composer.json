@@ -1,0 +1,25 @@
+{
+    "name": "codeception/phpbuiltinserver",
+    "description": "PhpBuiltinServer extension for Codeception",
+    "keywords": ["codeception"],
+    "minimum-stability": "stable",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "tiger-seo",
+            "email": "tiger.seo@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "codeception/codeception": "~2.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Codeception": "src"
+        }
+    },
+    "config": {
+        "bin-dir": "bin"
+    }
+}

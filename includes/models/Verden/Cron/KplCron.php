@@ -6,7 +6,8 @@
  * 
  */
 
-class Model_Wms_Cron_KplCron {
+require_once 'includes/verden.php';
+class Model_Verden_Cron_KplCron {
 	
 	/**
 	 * 
@@ -21,7 +22,7 @@ class Model_Wms_Cron_KplCron {
 	 */
 	public function __construct () {
 
-		echo "- Iniciando Cron para processar integração com sistema ERP KPL via webservice" . PHP_EOL;
+		echo "- Iniciando Cron para processar integracao com sistema ERP KPL via webservice" . PHP_EOL;
 		
 	}
 
@@ -182,9 +183,9 @@ class Model_Wms_Cron_KplCron {
 		ini_set ( 'memory_limit', '512M' );
 			
 			if ( empty ( $this->_kpl ) ) {
-				$this->_kpl = new Model_Wms_Kpl_KplWebService ( $cli_id );
+				$this->_kpl = new Model_Verden_Kpl_KplWebService();
 			}
-			echo "- importando produtos do cliente {$cli_id} - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
+			echo "- importando produtos do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
 
 			try {
 				$chaveIdentificacao = KPL_KEY;
@@ -196,7 +197,7 @@ class Model_Wms_Cron_KplCron {
 					echo "Não existem produtos disponíveis para integração" . PHP_EOL;
 				} else {
 					
-					$kpl_produtos = new Model_Wms_Kpl_Produtos ( $cli_id );
+					$kpl_produtos = new Model_Verden_Kpl_Produtos();
 						$retorno = $kpl_produtos->ProcessaProdutosWebservice ( $produtos ['ProdutosDisponiveisResult'] ['Rows'] );
 						if(is_array($retorno))
 						{
@@ -305,4 +306,5 @@ class Model_Wms_Cron_KplCron {
 		echo "- Finalizando cron para baixar notas fiscais disponíveis KPL" . PHP_EOL;
 	}
 }
-	
+$obj= new Model_Verden_Cron_KplCron();
+$obj->CadastraProdutosKpl();	

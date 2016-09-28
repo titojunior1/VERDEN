@@ -1,0 +1,321 @@
+<?php 
+use ZfcDatagrid\Column\Action\Button;
+use ZfcDatagrid\Filter;
+
+/* @var $paginator \Zend\Paginator\Paginator */
+$paginator = $this->paginator;
+
+$parameterNames = $this->optionsRenderer['parameterNames'];
+
+$url = $this->url(null, array(), array(), true);
+if($this->overwriteUrl != ''){
+    $url = $this->overwriteUrl;
+}
+$parametersHtml = array();
+foreach($this->parameters as $name => $value){
+    $parametersHtml []= $name.': \''.$value.'\'';
+}
+
+$tableClasses = array();
+$rowClickLink = '';
+
+if($this->rowClickAction){
+    $tableClasses[] = 'clickable';
+    
+    $rowClickLink = $this->rowClickAction->getLink();
+    if(count($this->rowClickAction->getLinkColumnPlaceholders()) > 0){
+        throw new \Exception('Currently the row click action cannot bet used with Column parameters, except the rowId...');
+    }
+}
+
+/*
+ * Column - background-color
+ */
+$styleString = '';
+foreach($this->columns as $col){
+    /* @var $col \ZfcDatagrid\Column\AbstractColumn */
+    foreach ($col->getStyles() as $style) {
+
+        switch (get_class($style)) {
+
+            case 'ZfcDatagrid\Column\Style\BackgroundColor':
+                $css = '$(\'#\' + row.idConcated).find(\'td[aria-describedby=' . $this->gridId . '_' . $col->getUniqueId() . ']\').css(\'background-color\', \'#'.$style->getRgbHexString().'\');';
+                if ($style->hasByValues() === true) {
+                    foreach ($style->getByValues() as $rule) {
+                        $colString = $rule['column']->getUniqueId();
+                        $operator = '';
+                        switch ($rule['operator']) {
+
+                            case Filter::EQUAL:
+                                $operator = '==';
+                                break;
+
+                            case Filter::NOT_EQUAL:
+                                $operator = '!=';
+                                break;
+
+                            default:
+                                throw new \Exception('currently not implemented filter type: "' . $rule['operator'] . '"');
+                                break;
+                        }
+
+                        $styleString .= 'if(row.'.$colString.' ' . $operator . ' \''. $rule['value'] . '\'){';
+                        $styleString .= $css;
+                        $styleString .= '}';
+                    }
+                } else{
+                    $styleString .= $css;
+                }
+                break;
+        }
+    }
+}
+
+/*
+ * Row coloring
+ */
+foreach($this->rowStyles as $style){
+    /* @var $style \ZfcDatagrid\Column\Style\AbstractStyle */
+
+    $css = '';
+    $cssClass = '';
+    
+    switch (get_class($style)) {
+
+        case 'ZfcDatagrid\Column\Style\Bold':
+            $css = '\'font-weight\', \'bold\'';
+            break;
+
+        case 'ZfcDatagrid\Column\Style\Italic':
+            $css = '\'font-style\', \'italic\'';
+            break;
+        
+        case 'ZfcDatagrid\Column\Style\Strikethrough':
+            $css = '\'text-decoration\', \'line-through\'';
+            break;
+
+        case 'ZfcDatagrid\Column\Style\Color':
+            $css = '\'color\', \'#' . $style->getRgbHexString().'\'';
+            break;
+
+        case 'ZfcDatagrid\Column\Style\BackgroundColor':
+            $css = '\'background-color\', \'#' . $style->getRgbHexString().'\'';
+            break;
+        
+        case 'ZfcDatagrid\Column\Style\Align':
+            $css = '\'text-align\'' . $style->getAlignment();
+            break;
+            
+        case 'ZfcDatagrid\Column\Style\CSSClass':
+            $cssClass = $style->getClass();
+            break;
+
+        default:
+            throw new \Exception('Not defined yet: "' . get_class($style) . '"');
+            break;
+    }
+    
+    if($css != ''){
+        $css = '$(\'#\' + row.idConcated).find(\'td\').css('.$css.');';
+    }
+    
+    if($cssClass != ''){
+        $cssClass = '$(\'#\' + row.idConcated).find(\'td\').addClass(\'' . $cssClass . '\');';
+    }
+
+    if ($style->hasByValues() === true) {
+        foreach ($style->getByValues() as $rule) {
+            $colString = $rule['column']->getUniqueId();
+            $operator = '';
+            switch ($rule['operator']) {
+
+                case Filter::EQUAL:
+                    $operator = '==';
+                    break;
+
+                case Filter::NOT_EQUAL:
+                    $operator = '!=';
+                    break;
+
+                default:
+                    throw new \Exception('currently not implemented filter type: "' . $rule['operator'] . '"');
+                    break;
+            }
+
+            $styleString .= 'if(row.'.$colString.' ' . $operator . ' \''. $rule['value'] . '\'){';
+            if($css != ''){
+                $styleString .= $css;
+            }
+            if($cssClass != ''){
+                $styleString .= $cssClass;
+            }
+            $styleString .= '}';
+        }
+    }  else{
+        if($css != ''){
+            $styleString .= $css;
+        }
+        if($cssClass != ''){
+            $styleString .= $cssClass;
+        }
+    }
+}
+
+$itemCountPerPage = $paginator->getItemCountPerPage();
+if($paginator->getItemCountPerPage() === $paginator->getTotalItemCount()){
+    //@see http://stackoverflow.com/questions/1237096/how-to-show-all-rows-in-the-jqgrid
+    $itemCountPerPage = -1;
+}
+?>
+
+<?php echo $this->partial($this->templateToolbar);?>
+
+<table id="<?php echo $this->gridId; ?>" class="<?php echo implode(' ', $tableClasses); ?>"></table>
+<?php echo $this->partial('zfc-datagrid/renderer/jqGrid/footer'); ?>
+
+<iframe name="<?php echo $this->gridId; ?>_fileFrame" id="<?php echo $this->gridId; ?>_fileFrame" src="about:none" style="display: none;"></iframe>
+
+<?php $this->inlineScript()->captureStart(); ?>
+
+//Row background-color + column background-color
+function grid_<?php echo $this->gridId; ?>_loadComplete(data){
+    if(data.data && data.data.rows){
+        $.each(data.data.rows, function(key, row){
+            <?php echo $styleString; ?>
+        });
+    }
+}
+
+var grid_<?php echo $this->gridId; ?> = $('#<?php echo $this->gridId; ?>').jqGrid({
+
+	url: '<?php echo $url; ?>',
+
+	caption: '<?php echo $this->title; ?>',
+
+	height: 'auto',
+	autowidth : true,
+    forceFit : true,
+    shrinkToFit : true,
+    gridview : true,
+    hoverrows : true,
+    viewrecords : true,
+
+    <?php if(count($this->massActions) > 0): ?>
+    multiselect: true,
+    <?php endif; ?>
+    
+    grouping: true,
+    
+    rowNum: <?php echo $itemCountPerPage; ?>,
+
+	mtype : '<?= $parameterNames['method']; ?>',
+    postData: {
+        <?php
+        echo implode(',', $parametersHtml);
+        ?>
+    },
+	
+	
+	sortname: '<?php echo $this->activeParameters[$parameterNames['sortColumns']]; ?>',
+	sortorder: '<?php echo $this->activeParameters[$parameterNames['sortDirections']]; ?>',
+	
+	prmNames : {
+		page: '<?php echo $parameterNames['currentPage']; ?>',
+		rows: '<?php echo $parameterNames['itemsPerPage']; ?>',
+		sort: '<?php echo $parameterNames['sortColumns']; ?>',
+		order: '<?php echo $parameterNames['sortDirections']; ?>',
+		search: '<?php echo $parameterNames['isSearch']; ?>',
+	},
+	
+	//pager : '#<?php echo $this->gridId; ?>_pager',
+
+    colModel: <?php echo $this->jqgridColumns($this->columns); ?>,
+
+    datatype : 'local',
+    data: {data: <?php echo json_encode($this->data); ?>},
+    
+    jsonReader : {
+        repeatitems : false,
+        id : 'idConcated',
+
+        //The current page
+        page : function(data) {
+            if (data.data) {
+                return data.data.page;
+            }
+        },
+
+        records : function(data) {
+            if (data.data) {
+                return data.data.records;
+            }
+        },
+
+        total : function(data) {
+            if (data.data) {
+                return data.data.total;
+            }
+        },
+
+        //Data (rows)
+        root : function(data) {
+            if (data.data) {
+                return data.data.rows;
+            }
+        }
+    },
+
+    <?php if($rowClickLink != ''): ?>
+        onSelectRow: function(rowId, status, e){
+        	var colModel = grid_<?php echo $this->gridId; ?>.jqGrid('getGridParam','colModel');
+        	var name = colModel[$.jgrid.getCellIndex(e.target)];
+        	var colIndex = name.index;
+
+            var specialColumns = $.parseJSON('<?php echo json_encode($this->columnsRowClickDisabled); ?>');
+        	if ($.inArray( colIndex, specialColumns) !== -1 || colIndex === undefined) {
+                return false;
+            }
+            
+            var rowClickLink = '<?php echo $rowClickLink; ?>';
+            rowClickLink = rowClickLink.replace('<?php echo Button::ROW_ID_PLACEHOLDER; ?>', rowId);
+            window.location.href = rowClickLink;
+        },
+    <?php endif; ?>
+
+    loadComplete: function (data) {
+    	//custom pagination
+    	var paginator = <?php echo $this->gridId; ?>_customPaginator('<?php echo $this->gridId; ?>');
+    	$('#<?php echo $this->gridId; ?>_pager_center').html(paginator);
+    	
+        <?php if($styleString != ''): ?>
+        if(data !== undefined){
+            //on inti we load the first page, but locale type do not know about json data
+            grid_<?php echo $this->gridId; ?>_loadComplete(data);
+        }
+        <?php endif; ?>
+    },
+    
+    beforeSelectRow: function (rowId, e) {
+        return true;
+    }
+});
+<?php if($this->isUserFilterEnabled === true):?>
+    grid_<?php echo $this->gridId; ?>.jqGrid('filterToolbar');
+<?php endif; ?>
+
+/*
+ * The first page is loaded directly without ajax, that's why it's here complicated...
+ * @todo find something "smarter"
+ */
+grid_<?php echo $this->gridId; ?>.jqGrid('setGridParam', {
+    datatype : 'json',
+}).trigger('reload');
+grid_<?php echo $this->gridId; ?>.jqGrid()[0].addJSONData(grid_<?php echo $this->gridId; ?>.jqGrid('getGridParam', 'data'));
+grid_<?php echo $this->gridId; ?>.trigger('reload');
+grid_<?php echo $this->gridId; ?>_loadComplete(grid_<?php echo $this->gridId; ?>.jqGrid('getGridParam', 'data'));
+
+//custom pagination
+var paginator = <?php echo $this->gridId; ?>_customPaginator('<?php echo $this->gridId; ?>');
+$('#<?php echo $this->gridId; ?>_pager_center').html(paginator);
+
+<?php $this->inlineScript()->captureEnd(); ?>

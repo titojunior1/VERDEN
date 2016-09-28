@@ -120,12 +120,6 @@ function autoload($class) {
 			// inclusão do arquivo necessário
 			require_once ($path);
 			return;
-		}
-		
-		// Amazon API
-		require_once PATH_INCLUDES . 'aws-sdk-1.6.2/sdk.class.php';
-		if (CFLoader::autoloader($class)) {
-			return;
 		}		
 		
 		return false;

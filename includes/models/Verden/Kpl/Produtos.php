@@ -14,7 +14,7 @@
 //require_once ('erros_kpl.php');
 
 
-final class Model_Wms_Kpl_Produtos extends Model_Wms_Kpl_KplWebService {
+final class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 	
 	/**
 	 * Id do cliente.
@@ -38,10 +38,10 @@ final class Model_Wms_Kpl_Produtos extends Model_Wms_Kpl_KplWebService {
 	 * @param int $cli_id
 	 * @param int $empwh_id
 	 */
-	function __construct($cli_id) {
-		$this->_cli_id = $cli_id;
+	function __construct() {
+		
 		if (empty ( $this->_kpl )) {
-			$this->_kpl = new Model_Wms_Kpl_KplWebService ( $cli_id );
+			$this->_kpl = new Model_Verden_Kpl_KplWebService (  );
 		}
 	
 	}
@@ -162,9 +162,6 @@ final class Model_Wms_Kpl_Produtos extends Model_Wms_Kpl_KplWebService {
 	 */
 	function ProcessaProdutosWebservice ( $request ) {
 
-		// cria instância do banco de dados
-		$db = Db_Factory::getDbWms ();
-		
 		// produtos
 		$erro = null;
 		
@@ -177,11 +174,7 @@ final class Model_Wms_Kpl_Produtos extends Model_Wms_Kpl_KplWebService {
 					
 			$array_produtos [0] ['ProtocoloProduto'] = $request ['DadosProdutos'] ['ProtocoloProduto'];
 			$array_produtos [0] ['Categoria'] = isset($request ['DadosProdutos'] ['Categoria']) ? $request ['DadosProdutos'] ['Categoria']: '';
-			if($this->_cli_id == 77){ // Comportamento específico para Cliente Meu Espelho
-				$array_produtos [0] ['Nome'] = $request ['DadosProdutos'] ['Descricao']." - ".$request ['DadosProdutos'] ['NomeProduto'];
-			}else{
-				$array_produtos [0] ['Nome'] = $request ['DadosProdutos'] ['NomeProduto'];
-			}
+			$array_produtos [0] ['Nome'] = $request ['DadosProdutos'] ['NomeProduto'];			
 			$array_produtos [0] ['Classificacao'] = isset($request ['DadosProdutos'] ['Classificacao']) ? $request ['DadosProdutos'] ['Classificacao']: '';
 			$array_produtos [0] ['Altura'] = $request ['DadosProdutos'] ['Altura'];
 			$array_produtos [0] ['Largura'] = $request ['DadosProdutos'] ['Largura'];
@@ -192,29 +185,19 @@ final class Model_Wms_Kpl_Produtos extends Model_Wms_Kpl_KplWebService {
 			$array_produtos [0] ['EanProprio'] = $request ['DadosProdutos'] ['CodigoBarras'];
 			$array_produtos [0] ['EstoqueMinimo'] = $request ['DadosProdutos'] ['QtdeMinimaEstoque'];
 			$array_produtos [0] ['ValorVenda'] = '0.00';
-			
 			$array_produtos [0] ['Descricao'] =  empty($request ['DadosProdutos'] ['Descricao'])? $request ['DadosProdutos'] ['NomeProduto'] : str_replace('<BR>','',$request ['DadosProdutos'] ['Descricao']) ;
-			
-			if($this->_cli_id=='75' || $this->_cli_id =='77'){
-				$array_produtos [0] ['ValorCusto'] = isset($request ['DadosProdutos'] ['CustoDoProduto']) ? $request ['DadosProdutos'] ['CustoDoProduto']: '0.00';
-			}else{
-				$array_produtos [0] ['ValorCusto'] = isset($request ['DadosProdutos'] ['ValorCusto']) ? $request ['DadosProdutos'] ['ValorCusto']: '0.00';				
-			}
-			
+			$array_produtos [0] ['ValorCusto'] = isset($request ['DadosProdutos'] ['ValorCusto']) ? $request ['DadosProdutos'] ['ValorCusto']: '0.00';
 			$array_produtos [0] ['CodigoProdutoPai'] = isset($request ['DadosProdutos'] ['CodigoProdutoPai']) ? $request ['DadosProdutos'] ['CodigoProdutoPai']: '';
 			$array_produtos [0] ['Unidade'] = isset($request ['DadosProdutos'] ['Unidade']) ? $request ['DadosProdutos'] ['Unidade']: '';
 		
 		} else {
 			
 			foreach ( $request ["DadosProdutos"] as $i => $d ) {
-				// 			 Nome do campo no wms  =  Nome do campo no Kpl
+				
+				//Nome do campo no wms  =  Nome do campo no Kpl
 				$array_produtos [$i] ['ProtocoloProduto'] = $d ['ProtocoloProduto'];
 				$array_produtos [$i] ['Categoria'] = isset($d ['Categoria']) ? $d ['Categoria']: '';				
-				if($this->_cli_id == 77){ // Comportamento específico para Cliente Meu Espelho
-					$array_produtos [$i] ['Nome'] = $d ['Descricao']." - ".$d ['NomeProduto'];
-				}else{
-					$array_produtos [$i] ['Nome'] = $d ['NomeProduto'] ;
-				}
+				$array_produtos [$i] ['Nome'] = $d ['NomeProduto'] ;
 				$array_produtos [$i] ['Classificacao'] = isset($d ['Classificacao']) ? $d ['Classificacao']: '';
 				$array_produtos [$i] ['Altura'] = $d ['Altura'];
 				$array_produtos [$i] ['Largura'] = $d ['Largura'];
@@ -224,20 +207,19 @@ final class Model_Wms_Kpl_Produtos extends Model_Wms_Kpl_KplWebService {
 				$array_produtos [$i] ['SKU'] = $d ['CodigoProduto'];
 				$array_produtos [$i] ['EanProprio'] = $d ['CodigoBarras'];
 				$array_produtos [$i] ['EstoqueMinimo'] = $d ['QtdeMinimaEstoque'];
-				$array_produtos [$i] ['ValorVenda'] = '0.00';
-				
+				$array_produtos [$i] ['ValorVenda'] = '0.00';				
 				$array_produtos [$i] ['Descricao'] =  empty($d ['Descricao'])? $d ['NomeProduto'] : str_replace('<BR>','',$d  ['Descricao']) ;
-				
-				if($this->_cli_id=='75' || $this->_cli_id=='77'){
-					$array_produtos [$i] ['ValorCusto'] = isset($d ['CustoDoProduto']) ? $d ['CustoDoProduto']: '0.00';
-				}else{
-					$array_produtos [$i] ['ValorCusto'] = isset($d ['ValorCusto']) ? $d ['ValorCusto']: '0.00';
-				}
-				
+				$array_produtos [$i] ['ValorCusto'] = isset($d ['ValorCusto']) ? $d ['ValorCusto']: '0.00';				
 				$array_produtos [$i] ['CodigoProdutoPai'] = isset($d ['CodigoProdutoPai']) ? $d ['CodigoProdutoPai']: '';
 				$array_produtos [$i] ['Unidade'] = isset($d ['Unidade']) ? $d ['Unidade']: '';
 			}
 		}
+		
+		$qtdProdutos = count($array_produtos);
+		
+		echo PHP_EOL;
+		echo "Produtos encontrados para integracao: " . $qtdProdutos . PHP_EOL;
+		echo PHP_EOL;
 		
 		// Percorrer array de produtos
 		foreach ( $array_produtos as $indice => $dados_produtos ) {
@@ -247,22 +229,6 @@ final class Model_Wms_Kpl_Produtos extends Model_Wms_Kpl_KplWebService {
 			$incluir_produto = false;
 			// validar campos obrigatórios
 			
-
-			if ( empty ( $dados_produtos ['CodigoProdutoPai'] ) && $this->_cli_id == '66') {
-				
-				//enviar protocolo do produto...
-				try {
-					
-					$this->_kpl->ConfirmarProdutosDisponiveis ( $dados_produtos ['ProtocoloProduto'] );
-					echo "Protocolo Produto Pai: {$dados_produtos['ProtocoloProduto']}" . PHP_EOL;
-				} catch ( Exception $e ) {
-					echo $e->getMessage () . PHP_EOL;
-				}
-				
-				continue;
-			
-			}
-			
 			if ( empty ( $dados_produtos ['Nome'] ) || empty ( $dados_produtos ['Descricao'] ) || empty ( $dados_produtos ['PartNumber'] ) || empty ( $dados_produtos ['SKU'] ) || empty ( $dados_produtos ['EanProprio'] ) ) {
 				echo "Produto {$dados_produtos['SKU']}: Dados obrigatórios não preenchidos" . PHP_EOL;
 				$array_erro [$indice] = "Produto {$dados_produtos['SKU']}: Dados obrigatórios não preenchidos" . PHP_EOL;
@@ -271,28 +237,34 @@ final class Model_Wms_Kpl_Produtos extends Model_Wms_Kpl_KplWebService {
 			if ( $erros_produtos == 0 ) {
 				
 				try {
-					$produtos = $this->buscaProduto ( $dados_produtos ['SKU'], $dados_produtos ['PartNumber'], $dados_produtos ['EanProprio'] );
+					$produto = ''; //$this->buscaProduto ( $dados_produtos ['SKU'], $dados_produtos ['PartNumber'], $dados_produtos ['EanProprio'] );
 					if ( empty ( $produtos ) ) {
-						$this->_adicionaProduto ( $dados_produtos );
+						echo "Adicionando produto " . $dados_produtos['SKU'] . PHP_EOL;
+						// DESCOMENTAR DEPOIS -- PARTE MAGENTO
+						//$this->_adicionaProduto ( $dados_produtos );
 					} else {
 						$prod_id = $produtos ['prod_id'];
 						//verificar se existe alguma atualização no produto
 						if ( ($dados_produtos ['Nome'] != $produtos ['prod_nome'])  || ($dados_produtos ['EanProprio'] != $produtos ['prod_ean_proprio']) ) {
+							echo "Atualizando produto " . $dados_produtos['SKU'] . PHP_EOL;
 							//atualizar o produto
-							$this->_atualizaProduto ( $prod_id, $dados_produtos );
+							// DESCOMENTAR DEPOIS -- PARTE MAGENTO
+							//$this->_atualizaProduto ( $prod_id, $dados_produtos );
 							echo "Atualizacao de produto -{$dados_produtos['SKU']} -  ";
 						} else {
 							echo "Produto {$dados_produtos['SKU']} existente - Sem atualizacao -";
 						}
 					}
 					
-					//devolver o protocolo do produto
-					$this->_kpl->ConfirmarProdutosDisponiveis ( $dados_produtos ['ProtocoloProduto'] );
-					echo "Protocolo Produto: {$dados_produtos['ProtocoloProduto']}" . PHP_EOL;
+					//devolver o protocolo do produto DESCOMENTAR DEPOIS
+					//$this->_kpl->ConfirmarProdutosDisponiveis ( $dados_produtos ['ProtocoloProduto'] );
+					echo "Protocolo Produto: {$dados_produtos['ProtocoloProduto']} enviado com sucesso" . PHP_EOL;
+					echo PHP_EOL;
 				
 		//verifica se o produto existe
 				} catch ( Exception $e ) {
 					echo "Erro ao importar produto {$dados_produtos['EanProprio']}: " . $e->getMessage() . PHP_EOL;
+					echo PHP_EOL;
 					$array_erro [$indice] = "Erro ao importar produto {$dados_produtos['EanProprio']}: " . $e->getMessage() . PHP_EOL;
 				}
 			

@@ -11,7 +11,7 @@
  * 
  */
 
-class Model_Wms_Kpl_KplWebService {
+class Model_Verden_Kpl_KplWebService {
 	
 	/**
 	 * Endereço do WebService.
@@ -82,35 +82,17 @@ class Model_Wms_Kpl_KplWebService {
 	 * @param string $login Login de Conexão do Webservice.
 	 * @param string $pass Senha de Conexão do Webservice.
 	 */
-	public function __construct($cli_id, $metodo = NULL) {
-		
-		$db = Db_Factory::getDbWms ();
-		
-		//selecionar dados de url e chave de identificação KPL
-		$sql = "SELECT c.cli_kpl_url, c.cli_kpl_chave_identificacao,cw.empwh_id as empwh_id FROM clientes c
-				INNER JOIN clientes_warehouse cw USING(cli_id)
-		WHERE c.cli_id={$cli_id}";
-		$res = $db->Execute ( $sql );
-		if (! $res) {
-			throw new RuntimeException ( 'Erro ao buscar dados da KPL do clientes' );
-		
-		}
-		$row = $db->FetchAssoc ( $res );
-		if (! empty ( $metodo )) {
-			$this->_ws = "http://200.201.198.251:8047/AbacosWebSvc/AbacosWSNotasFiscais.asmx?wsdl";
-		} else {
+	public function __construct() {
 			
-			$this->_ws = $row ['cli_kpl_url'];
-		}
+		$this->_ws = KPL_WSDL;
+			
 		try {
 			// conecta nusoap
 			$this->_webservice = new nusoap_client ( $this->_ws, true, NULL, NULL, NULL, NULL, 240, 240 );
 			$this->_webservice->_debug_flag = 1;
 			$this->_webservice->soap_defencoding = 'UTF-8';
 			$this->_webservice->decode_utf8 = true;
-			$this->_chave_identificacao = $row ['cli_kpl_chave_identificacao'];
-			$this->_empwh_id = $row ['empwh_id'];
-
+			$this->_chave_identificacao = KPL_KEY;
 		
 		} catch ( Exception $e ) {
 			throw new Exception ( 'Erro ao conectar no WebService' );

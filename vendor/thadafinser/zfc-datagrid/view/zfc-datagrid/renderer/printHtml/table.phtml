@@ -1,0 +1,19 @@
+<table>
+    <thead>
+        <tr>
+            <?php foreach($this->columns as $column): ?>
+                <td><?php echo $column->getLabel(); ?></td>
+            <?php endforeach; ?>
+        </tr>
+    </thead>
+    
+    <tbody>
+        <?php foreach($this->data as $row):?>
+            <tr>
+            <?php foreach($this->columns as $column): ?>
+                <td><?php echo $row[$column->getUniqueId()]; ?></td>
+            <?php endforeach; ?>
+            </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
