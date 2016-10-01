@@ -67,10 +67,6 @@ final class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 	 */
 	private function _adicionaProduto ( $dados_produtos ) {
 
-		if ( ! is_array ( $dados_produtos ) ) {
-			throw new Exception ( "Erro ao inserir produto" );
-		}
-		$db = Db_Factory::getDbWms ();
 		$dados_produtos ['Nome'] = $db->EscapeString ( $dados_produtos ['Nome'] );
 		$dados_produtos ['Descricao'] = $db->EscapeString ( $dados_produtos ['Descricao'] );
 		$dados_produtos ['Classificacao'] = $db->EscapeString ( $dados_produtos ['Classificacao'] );
@@ -80,14 +76,8 @@ final class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 		if ( empty ( $dados_produtos ['Categoria'] ) ) {
 			$dados_produtos ['Categoria'] = 1;
 		}
-		$sql = "INSERT INTO produtos (cli_id, amb_id,cat_id, prod_descricao, prod_nome, prod_custo,  prod_sku, prod_ean_proprio, prod_part_number,prod_alt,prod_larg,prod_comp,prod_peso) 
-					VALUES ({$this->_cli_id}, 1,{$dados_produtos['Categoria']}, '{$dados_produtos['Descricao']}', '{$dados_produtos['Nome']}', '{$dados_produtos['ValorCusto']}',  
-					'{$dados_produtos ['SKU']}', '{$dados_produtos ['EanProprio']}', '{$dados_produtos ['PartNumber']}',{$dados_produtos['Altura']},{$dados_produtos['Largura']},{$dados_produtos['Comprimento']},{$dados_produtos['Peso']})";
-		$res = $db->Execute ( $sql );
-		if ( ! $res ) {
-			throw new RuntimeException ( 'Erro ao inserir produto' );
-		}
-		
+
+		// PARTE MAGENTO		
 		return true;
 	}
 
@@ -100,14 +90,8 @@ final class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 	 */
 	private function _atualizaProduto ( $prod_id, $dados_produtos ) {
 
-		$db = Db_Factory::getDbWms ();
 		$dados_produtos ['Nome'] = $db->EscapeString ( $dados_produtos ['Nome'] );
-		$sql = "UPDATE produtos SET prod_descricao='{$dados_produtos ['Nome']}', 
-				prod_nome='{$dados_produtos ['Nome']}', prod_ean_proprio='{$dados_produtos['EanProprio']}' WHERE prod_id = {$prod_id} ";
-		$res = $db->Execute ( $sql );
-		if ( ! $res ) {
-			throw new RuntimeException ( "Erro sistêmico ao atualizar produto filho" );
-		}
+        // PARTE MAGENTO
 	
 	}
 
@@ -122,8 +106,6 @@ final class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 	 */
 	public function buscaProduto ( $sku, $part_number, $ean_proprio ) {
 
-		$db = Db_Factory::getDbWms ();
-		
 		$sku = trim ( $sku );
 		if ( empty ( $sku ) ) {
 			throw new InvalidArgumentException ( 'SKU do produto inválido' );
@@ -135,22 +117,8 @@ final class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 		}
 		
 		// verificar se o produto existe
-		$sql = "SELECT prod_id, prod_nome, prod_descricao, prod_sku, prod_part_number, prod_custo, prod_ean_proprio FROM produtos WHERE prod_ean_proprio = '{$ean_proprio}' AND prod_part_number='{$part_number}'  AND cli_id = {$this->_cli_id} ";
-		$qry = $db->Execute ( $sql );
-		if ( ! $qry ) {
-			throw new RuntimeException ( 'Erro sistêmico ao buscar Produto' );
-		}
 		
-		if ( $db->NumRows ( $qry ) == 0 ) {
-			return NULL;
-		}
-		$row = $db->FetchAssoc ( $qry );
-		// Validar se SKU é o mesmo do enviado para cadastro/atualização
-		if( $sku == $row['prod_sku'] ){
-			return $row;
-		}else{
-			throw new InvalidArgumentException ( "EAN Próprio {$ean_proprio} ja cadastrado para o SKU {$row['prod_sku']}. SKU enviado: {$sku}" );
-		}		
+		// BUSCAR PRODUTO MAGENTO		
 	
 	}
 
@@ -284,78 +252,6 @@ final class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 		}
 		return $array_retorno;
 	
-	}
-
-	public function CadastraProdutosKpl () {
-
-		echo "- Iniciando cron para cadastrar produtos do Kpl" . PHP_EOL;
-		
-		$data = date ( 'Y-m-d' );
-		
-		// Percorrer clientes
-		if ( ! empty ( $this->_clientes ) ) {
-			foreach ( $this->_clientes as $cliente ) {
-				
-				//if ( $cliente['ws'] != "" || $cliente['login'] != "" || $cliente['pass'] != "" || $cliente['cli_id'] != "" || $cliente['empwh_id'] != "") {
-				
-
-				// Gera objeto de conexão WebService
-				//		$this->_kpl = new Model_Wms_Kpl ( $cliente['ws']);		
-				$this->_kpl = new Model_Wms_Kpl_KplWebService ( $cliente ['ws'] );
-				$cli_id = $cliente ['cli_id'];
-				$empwh_id = '17';
-				try {
-					echo "- importando produtos do cliente {$cli_id}, warehouse {$empwh_id} " . PHP_EOL;
-					
-					// Solicita Produtos Disponíveis
-					$produtos = $this->_kpl->ProdutosDisponiveis ( $cliente ['chaveIdentificacao'] );
-					// Verifica se o array existe
-					if ( ! is_array ( $produtos ['ProdutosDisponiveisResult'] ) ) {
-						throw new Exception ( 'Erro ao buscar Produtos' );
-					}
-					
-					// Selecionar guid
-					$guid = $dados_itens ['guid'];
-					
-					// Efetua cadastro dos produtos do kpl
-					$kpl = new Model_Wms_Kpl_Produtos ( $cli_id, $empwh_id );
-					$kpl->ProcessaProdutosWebservice ( $guid, $produtos ['ProdutosDisponiveisResult'] ['Rows'] );
-					
-					// Confirma Produtos Disponíveis (envia array)
-					if ( ! empty ( $kpl ) && is_array ( $kpl ) ) {
-						echo "- enviando <XML> de confirmação para Kpl" . PHP_EOL;
-						
-						// cria cabeçalho do arquivo
-						$buffer = ' <KPLTEX xmlns="urn:tracking-schema">
-											<Cabecalho>
-		    									<CodEmpresa>73939449000193</CodEmpresa> 
-		    									<NomeEmpresa>TEX COURIER LTDA.</NomeEmpresa> 
-			   								</Cabecalho>
-		    								<ConfirmarProdutosDisponiveis>';
-						
-						foreach ( $kpl as $indice => $valor ) {
-							$buffer .= $indice . $valor;
-						}
-						$buffer .= "</ConfirmarProdutosDisponiveis></KPLTEX>";
-						$parametros ['xml'] = $buffer;
-						// Realizando transmissão
-						$resultado = $this->_kpl->realizaTransmissao ( 'Produtos', $parametros );
-						echo $resultado;
-					}
-					
-					echo "- importação de produtos do cliente {$cli_id} realizada com sucesso" . PHP_EOL;
-				} catch ( Exception $e ) {
-					echo "- erros ao importar os produtos do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
-				}
-				echo PHP_EOL;
-				// destrói variável
-				unset ( $kpl );
-			
-		//}
-			}
-		}
-		
-		echo "- Finalizando cron para cadastrar produtos do Kpl" . PHP_EOL;
 	}
 
 }

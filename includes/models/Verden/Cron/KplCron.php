@@ -201,8 +201,7 @@ class Model_Verden_Cron_KplCron {
 						$retorno = $kpl_produtos->ProcessaProdutosWebservice ( $produtos ['ProdutosDisponiveisResult'] ['Rows'] );
 						if(is_array($retorno))
 						{
-							// gravar logs de erro						
-							$this->_log->gravaLogErros($cron_id, $retorno);					
+							// ERRO					
 						}	
 					}
 					
