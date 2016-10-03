@@ -4,33 +4,14 @@
  * 
  * Classe para processar o cadastro de fornecedores via webservice do ERP KPL - Ábacos 
  * 
- * @author    Rômulo Z. C. Cunha <romulo.cunha@totalexpress.com.br>
- * @copyright Total Express - www.totalexpress.com.br
- * @package   wms
- * @since     30/08/2012
+ * @author  Tito Junior 
  * 
  */
 
 //require_once ('erros_kpl.php');
 
 
-final class Model_Wms_Kpl_Fornecedor extends Model_Wms_Kpl_KplWebService {
-	private $_climov_id;
-	private $_climov_tipo;
-	
-	/**
-	 * Id do cliente.
-	 *
-	 * @var int
-	 */
-	private $_cli_id;
-	
-	/**
-	 * Id do warehouse.
-	 *
-	 * @var int
-	 */
-	private $_empwh_id;
+final class Model_Verden_Kpl_Fornecedor extends Model_Verden_Kpl_KplWebService {	
 	
 	private $_kpl;
 
@@ -39,26 +20,14 @@ final class Model_Wms_Kpl_Fornecedor extends Model_Wms_Kpl_KplWebService {
 	 * construtor.
 	 * @param int $cli_id
 	 */
-	function __construct ( $cli_id ) {
+	function __construct () {
 
-		$this->_cli_id = $cli_id;
 		if ( empty ( $this->_kpl ) ) {
-			$this->_kpl = new Model_Wms_Kpl_KplWebService ( $cli_id );
+			$this->_kpl = new Model_Verden_Kpl_KplWebService ();
 		}
 	
 	}
-
-	/**
-	 * 
-	 * retorna erro utilizando erros_abacos.php.
-	 * @param int $codigo						// código do erro
-	 * @param string ou array $parametro		// string ou array do parametro do erro, caso seja pertinente 
-	 * @param string $exception					// mensagem de exceção
-	 */
-	/*	private function retorna_erro($codigo, $parametro = NULL, $exception = NULL) {
-		$temp = new erros_kpl ( $codigo, $parametro, $exception );
-		return $temp->retorna_erro ( $codigo, $parametro, $exception );
-	}*/
+	
 	/**
 	 * 
 	 * Processar cadastro de fornecedores via webservice
@@ -66,9 +35,6 @@ final class Model_Wms_Kpl_Fornecedor extends Model_Wms_Kpl_KplWebService {
 	 * @param array $request
 	 */
 	function ProcessaFornecedoresWebservice ( $request ) {
-
-		// cria instância do banco de dados
-		$db = Db_Factory::getDbWms ();
 		
 		$codigoproc = 1;
 		

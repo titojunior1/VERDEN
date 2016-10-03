@@ -4,10 +4,7 @@
  * 
  * Classe para trabalhar com o Webservice da KPL (Stub de Serviço)
  * 
- * @author    Rômulo Z. C. Cunha <romulo.cunha@totalexpress.com.br>
- * @copyright Total Express - www.totalexpress.com.br
- * @package   wms
- * @since     30/08/2012
+ * @author    Tito Junior
  * 
  */
 
@@ -336,7 +333,7 @@ class Model_Verden_Kpl_KplWebService {
 	 * @throws InvalidArgumentException
 	 * @throws Exception
 	 */
-	public function ConfirmarProdutosDisponiveis($protocoloProduto) {
+	public function confirmarProdutosDisponiveis($protocoloProduto) {
 		if (empty ( $protocoloProduto )) {
 			throw new InvalidArgumentException ( 'Protocolo do Produto não informado' );
 		}
@@ -354,8 +351,65 @@ class Model_Verden_Kpl_KplWebService {
 			throw new Exception ( $e->getMessage () );
 		
 		}
+		
+	}
+	
+	/**
+	 *
+	 * Método para confirmação de recebimento de preço junto à KPL.
+	 * @param string $protocoloProduto
+	 * @throws InvalidArgumentException
+	 * @throws Exception
+	 */
+	public function confirmarPrecosDisponiveis($protocoloPreco) {
+		if (empty ( $protocoloPreco )) {
+			throw new InvalidArgumentException ( 'Protocolo do Preço não informado' );
+		}
+	
+		try {
+			$resultado = $this->_webservice->call ( 'ConfirmarRecebimentoPreco', array ('ProtocoloPreco' => $protocoloPreco ) );
+			if ($resultado ['ConfirmarRecebimentoPrecoResult'] ['Codigo'] == '200001') {
+				return true;
+			} else {
+				//gravar mensagem de erro.
+				throw new Exception ( "Erro ao confirmar o envio do protocolo do preco" . PHP_EOL );
+					
+			}
+		} catch ( Exception $e ) {
+			throw new Exception ( $e->getMessage () );
+	
+		}
 	
 	}
+	
+	/**
+	 *
+	 * Método para confirmação de recebimento de estoque junto à KPL.
+	 * @param string $protocoloProduto
+	 * @throws InvalidArgumentException
+	 * @throws Exception
+	 */
+	public function confirmarEstoquesDisponiveis($protocoloEstoque) {
+		if (empty ( $protocoloEstoque )) {
+			throw new InvalidArgumentException ( 'Protocolo do Estoque não informado' );
+		}
+	
+		try {
+			$resultado = $this->_webservice->call ( 'ConfirmarRecebimentoEstoque', array ('ProtocoloPreco' => $protocoloEstoque ) );
+			if ($resultado ['ConfirmarRecebimentoEstoqueResult'] ['Codigo'] == '200001') {
+				return true;
+			} else {
+				//gravar mensagem de erro.
+				throw new Exception ( "Erro ao confirmar o envio do protocolo do estoque" . PHP_EOL );
+					
+			}
+		} catch ( Exception $e ) {
+			throw new Exception ( $e->getMessage () );
+	
+		}
+	
+	}
+	
 	/**
 	 * Retorna os fornecedores disponíveis para integração.
 	 * @param string $chaveIdentificacao
@@ -415,6 +469,32 @@ class Model_Verden_Kpl_KplWebService {
 		try {
 			// Recebe array com pedidos
 			return $this->_wsCall ( 'PedidosDisponiveis', array ('ChaveIdentificacao' => $chaveIdentificacao ) );
+		} catch ( Exception $e ) {
+			throw new RuntimeException ( $e->getMessage () );
+		}
+	}
+	
+	/**
+	 * Retorna todos os preços dos produto atualizados ou inseridos a partir de uma determinada data
+	 * @param date dateUpdated Data para pesquisa
+	 */
+	public function PrecosDisponiveis($chaveIdentificacao) {
+		try {
+			// Recebe array com pedidos
+			return $this->_wsCall ( 'PrecosDisponiveis', array ('ChaveIdentificacao' => $chaveIdentificacao ) );
+		} catch ( Exception $e ) {
+			throw new RuntimeException ( $e->getMessage () );
+		}
+	}
+	
+	/**
+	 * Retorna todos os estoques disponíveis
+	 * @param date dateUpdated Data para pesquisa
+	 */
+	public function EstoquesDisponiveis($chaveIdentificacao) {
+		try {
+			// Recebe array com pedidos
+			return $this->_wsCall ( 'EstoquesDisponiveis', array ('ChaveIdentificacao' => $chaveIdentificacao ) );
 		} catch ( Exception $e ) {
 			throw new RuntimeException ( $e->getMessage () );
 		}

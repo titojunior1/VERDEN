@@ -4,17 +4,11 @@
  * 
  * Classe para processar o cadastro de pedidos de venda (saída) via webservice do ERP KPL - Ábacos 
  * 
- * @author    Rômulo Z. C. Cunha <romulo.cunha@totalexpress.com.br>
- * @copyright Total Express - www.totalexpress.com.br
- * @package   wms
- * @since     28/08/2012
+ * @author Tito Junior 
  * 
  */
 
-//require_once ('erros_kpl.php');
-
-
-final class Model_Wms_Kpl_Pedido extends Model_Wms_Kpl_KplWebService {
+final class Model_Verden_Kpl_Pedido extends Model_Verden_Kpl_KplWebService {
 	
 	/**
 	 * Caracteres especiais
@@ -22,29 +16,15 @@ final class Model_Wms_Kpl_Pedido extends Model_Wms_Kpl_KplWebService {
 	private $_caracteres_especiais = array ( "\"", "'", "\\", "`" );
 	
 	/**
-	 * Id do cliente.
-	 *
-	 * @var int
-	 */
-	private $_cli_id;
-	
-	/**
-	 * Id do warehouse.
-	 *
-	 * @var int
-	 */
-	private $_empwh_id;
-
-	/**
 	 * 
 	 * construtor.
 	 * @param int $cli_id
 	 */
-	function __construct ( $cli_id, $empwh_id ) {
-
-		$this->_cli_id = $cli_id;
-		$this->_empwh_id = $empwh_id;
-	
+	function __construct () {
+		
+		if (empty ( $this->_kpl )) {
+			$this->_kpl = new Model_Verden_Kpl_KplWebService ();
+		}			
 	}
 
 	/**

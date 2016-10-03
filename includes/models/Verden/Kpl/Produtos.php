@@ -4,17 +4,10 @@
  * 
  * Classe para processar o cadastro de produtos via webservice do ERP KPL - Ábacos 
  * 
- * @author    Rômulo Z. C. Cunha <romulo.cunha@totalexpress.com.br>
- * @copyright Total Express - www.totalexpress.com.br
- * @package   wms
- * @since     28/08/2012
+ * @author Tito Junior 
  * 
  */
-
-//require_once ('erros_kpl.php');
-
-
-final class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
+class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 	
 	/**
 	 * Id do cliente.
@@ -225,7 +218,7 @@ final class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 					}
 					
 					//devolver o protocolo do produto DESCOMENTAR DEPOIS
-					//$this->_kpl->ConfirmarProdutosDisponiveis ( $dados_produtos ['ProtocoloProduto'] );
+					//$this->_kpl->confirmarProdutosDisponiveis ( $dados_produtos ['ProtocoloProduto'] );
 					echo "Protocolo Produto: {$dados_produtos['ProtocoloProduto']} enviado com sucesso" . PHP_EOL;
 					echo PHP_EOL;
 				

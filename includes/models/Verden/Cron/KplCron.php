@@ -28,25 +28,44 @@ class Model_Verden_Cron_KplCron {
 
 	/**
 	 * 
-	 * Atualiza estoque do Kpl baseado na tabela de movimentos_hist
+	 * Atualiza estoque do Kpl
+	 * 
+	 * 
 	 */
 	public function AtualizaEstoqueKpl () {
 
-		echo "- Iniciando cron para atualizar estoque do Kpl - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
-		
-			if ( empty ( $this->_kpl ) ) {
-				$this->_kpl = new Model_Wms_Kpl_KplWebService ( $cli_id );
-			}
+		ini_set ( 'memory_limit', '512M' );
 			
-			try {
-				echo "- atualizando estoque do cliente {$cli_id}" . PHP_EOL;
-				$estoque = new Model_Wms_Kpl_EstoqueKpl ( $cli_id, $empwh_id );
-				$estoque->geraAtualizacaoEstoque ( $data_inicio, $hora_inicio );
-							
-			} catch ( Exception $e ) {
-				echo "- Erros ao atualizar estoque do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
+		if ( empty ( $this->_kpl ) ) {
+			$this->_kpl = new Model_Verden_Kpl_KplWebService();
+		}
+		echo "- importando estoques disponíveis do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
+
+		try {
+			$chaveIdentificacao = KPL_KEY;
+			$estoques = $this->_kpl->EstoquesDisponiveis( $chaveIdentificacao );
+			if ( ! is_array ( $estoques ['EstoquesDisponiveisResult'] ) ) {
+				throw new Exception ( 'Erro ao buscar Estoque - ' . $estoques );
 			}
+			if ( $estoques ['EstoquesDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
+				echo "Não existem estoques disponíveis para integração" . PHP_EOL;
+			} else {
+				
+				$kpl_estoques = new Model_Verden_Kpl_EstoqueKpl();
+				$retorno = $kpl_estoques->ProcessaEstoqueWebservice ( $estoques ['EstoquesDisponiveisResult'] ['Rows'] );
+				if(is_array($retorno)){
+					// ERRO					
+				}	
+			}
+				
+			echo "- importação de estoque do cliente Verden realizada com sucesso" . PHP_EOL;
 		
+		} catch ( Exception $e ) {
+			echo "- erros ao importar estoque do cliente Verden: " . $e->getMessage () . PHP_EOL;
+		}
+		unset ( $this->_kpl );
+		unset ( $chaveIdentificacao );
+
 		echo "- Finalizando cron para atualizar estoque do Kpl" . PHP_EOL;
 	}
 
@@ -58,10 +77,10 @@ class Model_Verden_Cron_KplCron {
 
 		
 		if ( empty ( $this->_kpl ) ) {
-			$this->_kpl = new Model_Wms_Kpl_KplWebService ( $cli_id );
+			$this->_kpl = new Model_Verden_Kpl_KplWebService ();
 		}
 		
-		echo "- importando Fornecedores do cliente {$cli_id} -  " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
+		echo "- importando Fornecedores do cliente Verden -  " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
 		
 		try {
 			$chaveIdentificacao = KPL_KEY;
@@ -74,19 +93,19 @@ class Model_Verden_Cron_KplCron {
 				echo "Não existem fornecedores disponíveis para integração".PHP_EOL;
 			
 			}else{
-				$kpl_fornecedores = new Model_Wms_Kpl_Fornecedor ( $cli_id );
+				$kpl_fornecedores = new Model_Verden_Kpl_Fornecedor ();
 					$retorno = $kpl_fornecedores->ProcessaFornecedoresWebservice ( $fornecedores ['FornecedoresDisponiveisResult'] );
 				}
-				echo "- importação de fornecedores do cliente {$cli_id} realizada com sucesso" . PHP_EOL;
+				echo "- importação de fornecedores do cliente Verden realizada com sucesso" . PHP_EOL;
 			
 		
 		} catch ( Exception $e ) {
-			echo "- erros ao importar os fornecedores do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
+			echo "- erros ao importar os fornecedores do cliente Verden: " . $e->getMessage () . PHP_EOL;
 		}
 		unset ( $this->_kpl );
 		
 		
-		echo "- Finalizando cron para cadastrar produtos do Kpl" . PHP_EOL;
+		echo "- Finalizando cron para cadastrar fornecedores do Kpl" . PHP_EOL;
 	
 	}
 
@@ -182,39 +201,83 @@ class Model_Verden_Cron_KplCron {
 
 		ini_set ( 'memory_limit', '512M' );
 			
-			if ( empty ( $this->_kpl ) ) {
-				$this->_kpl = new Model_Verden_Kpl_KplWebService();
-			}
-			echo "- importando produtos do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
+		if ( empty ( $this->_kpl ) ) {
+			$this->_kpl = new Model_Verden_Kpl_KplWebService();
+		}
+		echo "- importando produtos do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
 
-			try {
-				$chaveIdentificacao = KPL_KEY;
-				$produtos = $this->_kpl->ProdutosDisponiveis ( $chaveIdentificacao );
-				if ( ! is_array ( $produtos ['ProdutosDisponiveisResult'] ) ) {
-					throw new Exception ( 'Erro ao buscar Produtos - ' . $produtos );
-				}
-				if ( $produtos ['ProdutosDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
-					echo "Não existem produtos disponíveis para integração" . PHP_EOL;
-				} else {
-					
-					$kpl_produtos = new Model_Verden_Kpl_Produtos();
-						$retorno = $kpl_produtos->ProcessaProdutosWebservice ( $produtos ['ProdutosDisponiveisResult'] ['Rows'] );
-						if(is_array($retorno))
-						{
-							// ERRO					
-						}	
-					}
-					
-					echo "- importação de produtos do cliente {$cli_id} realizada com sucesso" . PHP_EOL;
-			
-			} catch ( Exception $e ) {
-				echo "- erros ao importar os produtos do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
+		try {
+			$chaveIdentificacao = KPL_KEY;
+			$produtos = $this->_kpl->ProdutosDisponiveis ( $chaveIdentificacao );
+			if ( ! is_array ( $produtos ['ProdutosDisponiveisResult'] ) ) {
+				throw new Exception ( 'Erro ao buscar Produtos - ' . $produtos );
 			}
-			unset ( $this->_kpl );
-			unset ( $chaveIdentificacao );
+			if ( $produtos ['ProdutosDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
+				echo "Não existem produtos disponíveis para integração" . PHP_EOL;
+			} else {
+				
+				$kpl_produtos = new Model_Verden_Kpl_Produtos();
+					$retorno = $kpl_produtos->ProcessaProdutosWebservice ( $produtos ['ProdutosDisponiveisResult'] ['Rows'] );
+					if(is_array($retorno))
+					{
+						// ERRO					
+					}	
+				}
+				
+				echo "- importação de produtos do cliente {$cli_id} realizada com sucesso" . PHP_EOL;
+		
+		} catch ( Exception $e ) {
+			echo "- erros ao importar os produtos do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
+		}
+		unset ( $this->_kpl );
+		unset ( $chaveIdentificacao );
 
 		echo "- Finalizando cron para cadastrar produtos do Kpl" . PHP_EOL;
 	}
+	
+	/**
+	 *
+	 * Importa os preços disponíveis.
+	 * @throws Exception
+	 */
+	public function CadastraPrecosKpl () {
+	
+		ini_set ( 'memory_limit', '512M' );
+			
+		if ( empty ( $this->_kpl ) ) {
+			$this->_kpl = new Model_Verden_Kpl_KplWebService();
+		}
+		echo "- importando preços do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
+	
+		try {
+			$chaveIdentificacao = KPL_KEY;
+			$precos = $this->_kpl->PrecosDisponiveis( $chaveIdentificacao );
+			if ( ! is_array ( $precos ['PrecosDisponiveisResult'] ) ) {
+				throw new Exception ( 'Erro ao buscar Preços - ' . $precos );
+			}
+			if ( $precos ['PrecosDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
+				echo "Não existem preços disponíveis para integração" . PHP_EOL;
+			} else {
+					
+				$kpl_preços = new Model_Verden_Kpl_Precos();
+				$retorno = $kpl_preços->ProcessaPrecosWebservice( $precos ['PrecosDisponiveisResult'] ['Rows'] );
+				if(is_array($retorno))
+				{
+					// ERRO
+				}
+			}
+				
+			echo "- importação de preços do cliente {$cli_id} realizada com sucesso" . PHP_EOL;
+				
+		} catch ( Exception $e ) {
+		echo "- erros ao importar os preços do cliente Verden: " . $e->getMessage () . PHP_EOL;
+		}
+		unset ( $this->_kpl );
+		unset ( $chaveIdentificacao );
+	
+		echo "- Finalizando cron para atualizar preços do Kpl" . PHP_EOL;
+	}
+	
 
 	/**
 	 * 
