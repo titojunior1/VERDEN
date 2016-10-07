@@ -27,9 +27,7 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 	
 	/**
 	 * 
-	 * construtor.
-	 * @param int $cli_id
-	 * @param int $empwh_id
+	 * construtor.	 
 	 */
 	function __construct() {
 		

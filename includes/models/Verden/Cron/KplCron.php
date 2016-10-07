@@ -6,7 +6,6 @@
  * 
  */
 
-require_once 'includes/verden.php';
 class Model_Verden_Cron_KplCron {
 	
 	/**
@@ -368,5 +367,3 @@ class Model_Verden_Cron_KplCron {
 		echo "- Finalizando cron para baixar notas fiscais disponíveis KPL" . PHP_EOL;
 	}
 }
-$obj= new Model_Verden_Cron_KplCron();
-$obj->CadastraProdutosKpl();	

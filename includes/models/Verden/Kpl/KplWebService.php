@@ -25,32 +25,11 @@ class Model_Verden_Kpl_KplWebService {
 	private $_chave_identificacao;
 	
 	/**
-	 * 
-	 * Id do Armazem.
-	 * @var int
-	 */
-	private $_empwh_id;
-	
-	/**
 	 * instância do WebService
 	 *
 	 * @var string
 	 */
-	private $_webservice;
-	
-	/**
-	 * Login de Acesso do WebService.
-	 *
-	 * @var string
-	 */
-	private $_login;
-	
-	/**
-	 * Senha de Acesso do WebService.
-	 *
-	 * @var string
-	 */
-	private $_pass;
+	private $_webservice;	
 	
 	/**
 	 * Array de Mensagens de Erros.
