@@ -7,11 +7,5 @@
  *
  */
 class Model_Verden_Magento_Produtos extends Model_Verden_Magento_MagentoWebService{
-		
-	/**
-	 *
-	 * construtor.	
-	 */
-	function __construct() {}
 	
 }

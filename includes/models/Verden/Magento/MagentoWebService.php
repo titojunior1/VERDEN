@@ -1,4 +1,5 @@
 <?php
+use Mockery\Exception\RuntimeException;
 /**
  * 
  * Classe para trabalhar com o Webservice da Magento(Stub de Serviço)
@@ -83,8 +84,7 @@ class Model_Verden_Magento_MagentoWebService {
 		try {
 			
 			// conecta com o SoapClient
-			$this->_webservice = new SoapClient ( $this->_ws );		
-			
+			$this->_webservice = new SoapClient ( $this->_ws );			
 		
 		} catch ( Exception $e ) {
 			throw new Exception ( 'Erro ao conectar no WebService' );
@@ -115,7 +115,7 @@ class Model_Verden_Magento_MagentoWebService {
 		
 	}
 	
-	private function _encerraSessao(){
+	public function _encerraSessao(){
 	
 		try {
 				
@@ -128,7 +128,7 @@ class Model_Verden_Magento_MagentoWebService {
 	
 	}
 	
-	public function cadastraProduto( $produto ){
+	public function cadastraProduto( $sku, $produto ){
 		
 		if($this->_session_valid == false){
 			$this->_iniciaSessao();	
@@ -140,17 +140,17 @@ class Model_Verden_Magento_MagentoWebService {
 			$attributeSets = $this->_webservice->catalogProductAttributeSetList($this->_session);
 			$attributeSet = current($attributeSets);
 			
-			$result = $this->_webservice->catalogProductCreate($this->_session, 'simple', $attributeSet->set_id, $produto['Codigo'], $produto);			
+			$result = $this->_webservice->catalogProductCreate($this->_session, 'simple', $attributeSet->set_id, $sku, $produto);			
 		
-		} catch (Exception $e) {
-			throw new RuntimeException('Erro ao cadastrar Produto ' . $produto['Codigo']);
+		} catch ( Exception $e ) {
+			throw new RuntimeException( 'Erro ao cadastrar Produto ' . $sku );
 		}
 		
 		return $result;
 		
 	}
 	
-	public function atualizaProduto( $produto ){
+	public function atualizaProduto( $sku, $produto ){
 	
 		if($this->_session_valid == false){
 			$this->_iniciaSessao();
@@ -158,14 +158,30 @@ class Model_Verden_Magento_MagentoWebService {
 	
 		try {			
 				
-			$result = $this->_webservice->catalogProductUpdate( $this->_session, $produto['Codigo'], $produto );
+			$result = $this->_webservice->catalogProductUpdate( $this->_session, $sku, $produto );
 	
 		} catch (Exception $e) {
-			throw new RuntimeException('Erro ao atualizar Produto ' . $produto['Codigo']);
+			throw new RuntimeException( 'Erro ao atualizar Produto ' . $sku );
 		}
 	
 		return $result;
 	
+	}
+	
+	public function buscaProduto( $sku ){
+	
+		if($this->_session_valid == false){
+			$this->_iniciaSessao();
+		}
+	
+		try {
+	
+			$result = $this->_webservice->catalogProductInfo( $this->_session, $sku, null, null, 'sku' );
+			return true;
+			
+		} catch (SoapFault $e) {
+			return false;
+		}
 	}
 	
 }	

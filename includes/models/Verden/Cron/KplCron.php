@@ -5,7 +5,6 @@
  * @author Tito Junior <titojunior1@gmail.com>
  * 
  */
-
 class Model_Verden_Cron_KplCron {
 	
 	/**
@@ -206,6 +205,9 @@ class Model_Verden_Cron_KplCron {
 		echo "- importando produtos do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
 
 		try {
+			
+			echo PHP_EOL;
+			echo "Consultando produtos disponiveis para integracao " . PHP_EOL;
 			$chaveIdentificacao = KPL_KEY;
 			$produtos = $this->_kpl->ProdutosDisponiveis ( $chaveIdentificacao );
 			if ( ! is_array ( $produtos ['ProdutosDisponiveisResult'] ) ) {
@@ -231,7 +233,7 @@ class Model_Verden_Cron_KplCron {
 		unset ( $this->_kpl );
 		unset ( $chaveIdentificacao );
 
-		echo "- Finalizando cron para cadastrar produtos do Kpl" . PHP_EOL;
+		echo "- Finalizando cron para cadastrar produtos do Kpl" . date ( "d/m/Y H:i:s" ) . PHP_EOL;
 	}
 	
 	/**
