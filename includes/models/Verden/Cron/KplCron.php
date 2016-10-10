@@ -225,15 +225,15 @@ class Model_Verden_Cron_KplCron {
 					}	
 				}
 				
-				echo "- importação de produtos do cliente {$cli_id} realizada com sucesso" . PHP_EOL;
+				echo "- importacao de produtos do cliente Verden realizada com sucesso" . PHP_EOL;
 		
 		} catch ( Exception $e ) {
-			echo "- erros ao importar os produtos do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
+			echo "- erros ao importar os produtos do cliente Verden: " . $e->getMessage () . PHP_EOL;
 		}
 		unset ( $this->_kpl );
 		unset ( $chaveIdentificacao );
 
-		echo "- Finalizando cron para cadastrar produtos do Kpl" . date ( "d/m/Y H:i:s" ) . PHP_EOL;
+		echo "- Finalizando cron para cadastrar produtos do Kpl " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
 	}
 	
 	/**
