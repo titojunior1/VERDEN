@@ -209,8 +209,8 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 						echo "Atualizado com sucesso. " . PHP_EOL;
 					}
 					
-					//devolver o protocolo do produto DESCOMENTAR DEPOIS
-					//$this->_kpl->confirmarProdutosDisponiveis ( $dados_produtos ['ProtocoloProduto'] );
+					//devolver o protocolo do produto
+					$this->_kpl->confirmarProdutosDisponiveis ( $dados_produtos ['ProtocoloProduto'] );
 					echo "Protocolo Produto: {$dados_produtos['ProtocoloProduto']} enviado com sucesso" . PHP_EOL;
 					echo PHP_EOL;				
 		
