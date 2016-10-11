@@ -31,9 +31,9 @@ if (empty($registerGlobal)) {
     @extract($_GET);
     @extract($_POST);
 
-    if (session_status() != PHP_SESSION_NONE && is_array($_SESSION)) {
+    /*if (@session_status() != PHP_SESSION_NONE && is_array($_SESSION)) {
         @extract($_SESSION);
-    }
+    }*/
 }
 
 /*
