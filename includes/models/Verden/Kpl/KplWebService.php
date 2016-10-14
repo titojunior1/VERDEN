@@ -318,8 +318,8 @@ class Model_Verden_Kpl_KplWebService {
 		}
 		
 		try {
-			$resultado = $this->_webservice->call ( 'ConfirmarProdutosDisponiveis', array ('ProtocoloProduto' => $protocoloProduto ) );
-			if ($resultado ['ConfirmarProdutosDisponiveisResult'] ['Codigo'] == '200001') {
+			$resultado = $this->_webservice->call ( 'ConfirmarRecebimentoProduto', array ('ProtocoloProduto' => $protocoloProduto ) );
+			if ($resultado ['ConfirmarRecebimentoProdutoResult'] ['Codigo'] == '200001') {
 				return true;
 			} else {
 				//gravar mensagem de erro.

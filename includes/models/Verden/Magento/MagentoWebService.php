@@ -1,5 +1,4 @@
 <?php
-use Mockery\Exception\RuntimeException;
 /**
  * 
  * Classe para trabalhar com o Webservice da Magento(Stub de Serviço)

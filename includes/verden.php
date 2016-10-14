@@ -136,8 +136,9 @@ if ($sslEnabled && strcmp(php_sapi_name(), 'cli') != 0
  * Arquivos de inclusão principais
  **********************************************************/
 require_once(PATH_INCLUDES . 'classes.php'); // autoload das classes do sistema
+spl_autoload_register('autoload');
 //require_once(PATH_INCLUDES_ANTIGO . '/themes/blue/blue.php');
-
+/*
 // Assegura que a pasta com as bibliotecas estão no include_path
 set_include_path(implode(PATH_SEPARATOR, array(
     realpath(PATH_SISTEMA . '/vendor'),
@@ -153,7 +154,7 @@ spl_autoload_register('autoload');
 /*
  * Carregamento das bibliotecas
  * */
-
+/*
 // Core
 $coreAutoLoader = new SplClassLoader('Core', PATH_SISTEMA . 'vendor');
 $coreAutoLoader->setNamespaceSeparator('_');
@@ -165,10 +166,11 @@ $wmsAutoLoader->setNamespaceSeparator('_');
 $wmsAutoLoader->register();
 
 // autoload do pacotes do composer
-require PATH_SISTEMA . 'vendor/autoload.php';
+//require PATH_SISTEMA . 'vendor/autoload.php';
 
 // define o encoding padrão para o escape
 Core_View::setDefaultEncoding('ISO-8859-1');
 
 //Carregar as Bibliotecas do Composer
-require __DIR__ . '/../vendor/autoload.php';
+//require __DIR__ . '/../vendor/autoload.php';
+*/
