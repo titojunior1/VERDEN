@@ -84,7 +84,9 @@ class Model_Verden_Magento_MagentoWebService {
 			
 			// conecta com o SoapClient
 			$this->_webservice = new SoapClient ( $this->_ws );			
-		
+			$this->_webservice->soap_defencoding = 'UTF-8';
+			$this->_webservice->decode_utf8 = true;			
+			
 		} catch ( Exception $e ) {
 			throw new Exception ( 'Erro ao conectar no WebService' );
 		}
@@ -149,7 +151,7 @@ class Model_Verden_Magento_MagentoWebService {
 		
 	}
 	
-	public function atualizaProduto( $sku, $produto ){
+	public function atualizaProduto( $idProduto, $produto ){
 	
 		if($this->_session_valid == false){
 			$this->_iniciaSessao();
@@ -157,10 +159,10 @@ class Model_Verden_Magento_MagentoWebService {
 	
 		try {			
 				
-			$result = $this->_webservice->catalogProductUpdate( $this->_session, $sku, $produto );
+			$result = $this->_webservice->catalogProductUpdate( $this->_session, $idProduto, $produto );
 	
 		} catch (Exception $e) {
-			throw new RuntimeException( 'Erro ao atualizar Produto ' . $sku );
+			throw new RuntimeException( 'Erro ao atualizar Produto ID ' . $idProduto . ' - ' . $e->getMessage() );
 		}
 	
 		return $result;
@@ -176,7 +178,7 @@ class Model_Verden_Magento_MagentoWebService {
 		try {
 	
 			$result = $this->_webservice->catalogProductInfo( $this->_session, $sku, null, null, 'sku' );
-			return true;
+			return $result->product_id;
 			
 		} catch (SoapFault $e) {
 			return false;

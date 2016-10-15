@@ -2,4 +2,6 @@
 .project
 apache-logs
 
+flags/*
+
 configuration.php

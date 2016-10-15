@@ -67,7 +67,7 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 	 */
 	private function _atualizaProduto ( $dados_produtos ) {
 
-		$skuProduto = $dados_produtos['SKU'];
+		$idProduto = $dados_produtos['product_id'];
 		$produto =  array(
 							'name' => $dados_produtos ['Nome'],
 							'description' => $dados_produtos ['Descricao'],
@@ -82,7 +82,7 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 							'meta_title' => $dados_produtos ['Nome']
 						); 
 
-		$this->_magento->atualizaProduto($skuProduto, $produto);
+		$this->_magento->atualizaProduto($idProduto, $produto);
 	
 	}
 
@@ -205,6 +205,7 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 						echo "Adicionando com sucesso. " . PHP_EOL;
 					} else {
 						echo "Atualizando produto " . $dados_produtos['SKU'] . " na loja Magento" . PHP_EOL;
+						$dados_produtos['product_id'] = $produto; // ID do Produto na Loja Magento
 						$this->_atualizaProduto ( $dados_produtos );
 						echo "Atualizado com sucesso. " . PHP_EOL;
 					}
@@ -213,7 +214,7 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 					$this->_kpl->confirmarProdutosDisponiveis ( $dados_produtos ['ProtocoloProduto'] );
 					echo "Protocolo Produto: {$dados_produtos['ProtocoloProduto']} enviado com sucesso" . PHP_EOL;
 					echo PHP_EOL;				
-		
+
 				} catch ( Exception $e ) {
 					echo "Erro ao importar produto {$dados_produtos['SKU']}: " . $e->getMessage() . PHP_EOL;
 					echo PHP_EOL;
