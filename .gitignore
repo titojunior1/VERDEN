@@ -2,5 +2,5 @@
 .project
 .settings
 apache-logs
-
+flags
 configuration.php
