@@ -179,8 +179,9 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 		
 		
 		echo "Conectando ao WebService Magento... " . PHP_EOL;
-		echo PHP_EOL;
 		$this->_magento = new Model_Verden_Magento_Produtos();
+		echo "Conectado!" . PHP_EOL;
+		echo PHP_EOL;
 		
 		// Percorrer array de produtos
 		foreach ( $array_produtos as $indice => $dados_produtos ) {
@@ -198,22 +199,22 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 			if ( $erros_produtos == 0 ) {
 				
 				try {
+					echo "Buscando cadastro do produto " . $dados_produtos ['SKU'] . PHP_EOL;
 					$produto = $this->buscaProduto ( $dados_produtos ['SKU'] );
 					if ( $produto == false ) {
 						echo "Adicionando produto " . $dados_produtos['SKU'] . " na loja Magento" . PHP_EOL;
 						$this->_adicionaProduto ( $dados_produtos );
-						echo "Adicionando com sucesso. " . PHP_EOL;
+						echo "Produto adicionado. " . PHP_EOL;						
 					} else {
 						echo "Atualizando produto " . $dados_produtos['SKU'] . " na loja Magento" . PHP_EOL;
 						$dados_produtos['product_id'] = $produto; // ID do Produto na Loja Magento
 						$this->_atualizaProduto ( $dados_produtos );
-						echo "Atualizado com sucesso. " . PHP_EOL;
+						echo "Produto atualizado. " . PHP_EOL;
 					}
 					
 					//devolver o protocolo do produto
 					$this->_kpl->confirmarProdutosDisponiveis ( $dados_produtos ['ProtocoloProduto'] );
-					echo "Protocolo Produto: {$dados_produtos['ProtocoloProduto']} enviado com sucesso" . PHP_EOL;
-					echo PHP_EOL;				
+					echo "Protocolo Produto: {$dados_produtos['ProtocoloProduto']} enviado com sucesso" . PHP_EOL;				
 
 				} catch ( Exception $e ) {
 					echo "Erro ao importar produto {$dados_produtos['SKU']}: " . $e->getMessage() . PHP_EOL;

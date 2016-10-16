@@ -105,7 +105,9 @@ class Model_Verden_Magento_MagentoWebService {
 	private function _iniciaSessao(){
 		
 		try {
-
+			echo PHP_EOL;
+			echo "Iniciando Sessao " . PHP_EOL	;
+			echo PHP_EOL;
 			$this->_session = $this->_webservice->login ($this->_usuario, $this->_senha);
 			$this->_session_valid = true;
 			
@@ -119,7 +121,9 @@ class Model_Verden_Magento_MagentoWebService {
 	public function _encerraSessao(){
 	
 		try {
-				
+			echo PHP_EOL;
+			echo "Encerrando Sessao " . PHP_EOL	;
+			echo PHP_EOL;
 			$this->_session = $this->_webservice->endSession ( $this->_session );
 			$this->_session_valid = false;
 				
@@ -183,6 +187,22 @@ class Model_Verden_Magento_MagentoWebService {
 		} catch (SoapFault $e) {
 			return false;
 		}
+	}
+	
+	public function atualizaEstoqueProduto( $idProduto, $produto ){
+		
+		if($this->_session_valid == false){
+			$this->_iniciaSessao();
+		}
+		
+		try {
+		
+			$result = $this->_webservice->catalogInventoryStockItemUpdate( $this->_session, $idProduto, $produto );
+				
+		} catch (SoapFault $e) {
+			return false;
+		}
+		
 	}
 	
 }	

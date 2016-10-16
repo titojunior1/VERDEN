@@ -16,7 +16,7 @@ class Controller_Cron {
 	 * Array com extensoes de arquivos a serem verificadas
 	 * @var array
 	 */
-	protected static $_extensoes = array('CadastraProdutosKpl');
+	protected static $_extensoes = array('CadastraProdutosKpl', 'CadastraPrecosKpl');
 
 	/**
 	 * Exibe a ajuda básica do controller.
@@ -189,7 +189,7 @@ class Controller_Cron {
 		$filename = $pathFlags . $pidNovo . '.' . $metodo;
 
 		//Verificar se existem arquivos de flag já gerados
-		$arquivo_flag = self::get_files_dir($pathFlags, self::$_extensoes);
+		$arquivo_flag = self::get_files_dir($pathFlags, array($metodo) );
 		
 		if ( is_array($arquivo_flag) ){
 			foreach ($arquivo_flag as $id => $pidFlag){

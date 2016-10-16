@@ -37,7 +37,7 @@ class Model_Verden_Cron_KplCron {
 		if ( empty ( $this->_kpl ) ) {
 			$this->_kpl = new Model_Verden_Kpl_KplWebService();
 		}
-		echo "- importando estoques disponíveis do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
+		echo "- importando estoques disponiveis do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
 
 		try {
 			$chaveIdentificacao = KPL_KEY;
@@ -46,7 +46,7 @@ class Model_Verden_Cron_KplCron {
 				throw new Exception ( 'Erro ao buscar Estoque - ' . $estoques );
 			}
 			if ( $estoques ['EstoquesDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
-				echo "Não existem estoques disponíveis para integração" . PHP_EOL;
+				echo "Nao existem estoques disponiveis para integracao" . PHP_EOL;
 			} else {
 				
 				$kpl_estoques = new Model_Verden_Kpl_EstoqueKpl();
@@ -56,7 +56,7 @@ class Model_Verden_Cron_KplCron {
 				}	
 			}
 				
-			echo "- importação de estoque do cliente Verden realizada com sucesso" . PHP_EOL;
+			echo "- importacao de estoque do cliente Verden realizada com sucesso" . PHP_EOL;
 		
 		} catch ( Exception $e ) {
 			echo "- erros ao importar estoque do cliente Verden: " . $e->getMessage () . PHP_EOL;
@@ -248,7 +248,7 @@ class Model_Verden_Cron_KplCron {
 		if ( empty ( $this->_kpl ) ) {
 			$this->_kpl = new Model_Verden_Kpl_KplWebService();
 		}
-		echo "- importando preços do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
+		echo "- importando precos do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
 	
 		try {
 			$chaveIdentificacao = KPL_KEY;
@@ -268,15 +268,15 @@ class Model_Verden_Cron_KplCron {
 				}
 			}
 				
-			echo "- importação de preços do cliente {$cli_id} realizada com sucesso" . PHP_EOL;
+			echo "- importacao de precos do cliente Verden realizada com sucesso" . PHP_EOL;
 				
 		} catch ( Exception $e ) {
-		echo "- erros ao importar os preços do cliente Verden: " . $e->getMessage () . PHP_EOL;
+		echo "- erros ao importar os precos do cliente Verden: " . $e->getMessage () . PHP_EOL;
 		}
 		unset ( $this->_kpl );
 		unset ( $chaveIdentificacao );
 	
-		echo "- Finalizando cron para atualizar preços do Kpl" . PHP_EOL;
+		echo "- Finalizando cron para atualizar precos da Kpl" . PHP_EOL;
 	}
 	
 

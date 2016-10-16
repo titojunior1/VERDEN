@@ -1,5 +1,4 @@
 <?php
-
 /**
  * 
  * Classe para processar as atualizações de preço no ERP KPL - Ábacos 
@@ -10,20 +9,14 @@
 
 class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 	
-	/**
-	 * Id do cliente.
-	 *
-	 * @var int
-	 */
-	private $_cli_id;
+	/*
+	 * Instancia Webservice Magento
+	*/
+	private $_magento;
 	
-	/**
-	 * Id do warehouse.
-	 *
-	 * @var int
-	 */
-	private $_empwh_id;
-	
+	/*
+	 * Instancia Webservice KPL
+	*/
 	private $_kpl;
 	
 	/**
@@ -45,9 +38,15 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 	 * Método para atualização de preço dos produtos	 
 	 * @throws RuntimeException
 	 */
-	private function _atualizaPreco () {
+	private function _atualizaPreco ( $dados_precos ) {
 				
-        // PARTE MAGENTO
+        $idProduto = $dados_precos['product_id'];
+		$produto =  array(
+							'price' => $dados_precos ['PrecoTabela'],
+							'special_price' => $dados_precos ['PrecoPromocional'],
+						); 
+
+		$this->_magento->atualizaProduto($idProduto, $produto);
 	
 	}
 
@@ -122,16 +121,18 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 		echo "Precos encontrados para integracao: " . $qtdPrecos . PHP_EOL;
 		echo PHP_EOL;
 		
+		echo "Conectando ao WebService Magento... " . PHP_EOL;
+		$this->_magento = new Model_Verden_Magento_Precos();
+		echo "Conectado!" . PHP_EOL;
+		echo PHP_EOL;
+		
 		// Percorrer array de preços
 		foreach ( $array_precos as $indice => $dados_precos ) {
 			$erros_precos = 0;
-			$array_inclui_precos = array ();
-			
-			
-			
+			$array_inclui_precos = array ();			
 			
 			if ( empty ( $dados_precos ['PrecoTabela'] ) ) {
-				echo "Preço do produto {$dados_precos['CodigoProduto']}: Dados obrigatórios não preenchidos" . PHP_EOL;
+				echo "Preco do produto {$dados_precos['CodigoProduto']}: Dados obrigatórios não preenchidos" . PHP_EOL;
 				$array_erro [$indice] = "Produto {$dados_precos['CodigoProduto']}: Dados obrigatórios não preenchidos" . PHP_EOL;
 				$erros_precos ++;
 			}
@@ -139,26 +140,32 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 				
 				try {
 					// Localizar Produto para atualizar preço
-					$produto = ''; // Inserir informações do produto
-					if ( empty ( $produto ) ) {
-						echo "Atualizando Preço " . $produto['SKU'] . PHP_EOL;
-						// DESCOMENTAR DEPOIS -- PARTE MAGENTO
+					echo "Buscando cadastro do produto " . $dados_precos['CodigoProduto'] . PHP_EOL;
+					$produto = $this->_magento->buscaProduto($dados_precos['CodigoProduto']);
+					if ( !empty ( $produto ) ) {
+						echo "Atualizando Preco " . $dados_precos['CodigoProduto'] . PHP_EOL;
+						$dados_precos['product_id'] = $produto; // ID do Produto na Loja Magento
 						$this->_atualizaPreco( $dados_precos );
+						echo "Preco atualizado. " . PHP_EOL;
+						
+					}else{
+						throw new RuntimeException( 'Produto não encontrado' );
 					} 
 										
-					//devolver o protocolo do preço DESCOMENTAR DEPOIS
-					//$this->_kpl->confirmarPrecosDisponiveis ( $dados_precos ['ProtocoloPreco'] );
-					echo "Protocolo Preço: {$dados_precos ['ProtocoloPreco']} enviado com sucesso" . PHP_EOL;
-					echo PHP_EOL;				
+					$this->_kpl->confirmarPrecosDisponiveis ( $dados_precos ['ProtocoloPreco'] );
+					echo "Protocolo Preco: {$dados_precos ['ProtocoloPreco']} enviado com sucesso" . PHP_EOL;		
 
 				} catch ( Exception $e ) {
 					echo "Erro ao importar preco {$dados_precos['CodigoProduto']}: " . $e->getMessage() . PHP_EOL;
 					echo PHP_EOL;
-					$array_erro [$indice] = "Erro ao importar preço {$dados_precos['CodigoProduto']}: " . $e->getMessage() . PHP_EOL;
+					$array_erro [$indice] = "Erro ao importar preco {$dados_precos['CodigoProduto']}: " . $e->getMessage() . PHP_EOL;
 				}
 			
 			}
 		}		
+		
+		// finaliza sessão Magento
+		$this->_magento->_encerraSessao();
 		
 		if(is_array($array_erro)){
 			$array_retorno = $array_erro;

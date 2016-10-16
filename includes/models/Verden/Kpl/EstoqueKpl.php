@@ -31,8 +31,18 @@ class Model_Verden_Kpl_EstoqueKpl extends Model_Verden_Kpl_KplWebService {
 	/**
 	 * Método que faz a atualização do estoque de um produto
 	 */
-	private function _atualizaEstoque(){
-		// Preencher - PARTE MAGENTO	
+	private function _atualizaEstoque( $dados_estoque ){
+		
+		$idProduto = $dados_estoque['product_id'];
+		
+		$produto =  array(
+				'qty' => $dados_estoque ['SaldoDisponivel'],
+				'min_qty' => $dados_estoque ['SaldoMinimo'],
+				'is_in_stock' => 1
+		);
+		
+		$this->_magento->atualizaEstoqueProduto($idProduto, $produto);
+		
 	}
 	
 	/**
@@ -86,11 +96,16 @@ class Model_Verden_Kpl_EstoqueKpl extends Model_Verden_Kpl_KplWebService {
 		echo "Estoques encontrados para integracao: " . $qtdEstoques . PHP_EOL;
 		echo PHP_EOL;
 		
+		echo "Conectando ao WebService Magento... " . PHP_EOL;
+		$this->_magento = new Model_Verden_Magento_Precos();
+		echo "Conectado!" . PHP_EOL;
+		echo PHP_EOL;
+		
 		// Percorrer array de preços
 		foreach ( $array_estoques as $indice => $dados_estoque ) {
 			$erros_estoques = 0;			
 			
-			if ( empty ( $dados_estoque ['SaldoDisponivel'] ) ) {
+			if ( $dados_estoque ['SaldoDisponivel'] == NULL ) {
 				echo "Estoque do produto {$dados_estoque['CodigoProduto']}: Dados obrigatórios não preenchidos" . PHP_EOL;
 				$array_erro [$indice] = "Produto {$dados_estoque['CodigoProduto']}: Dados obrigatórios não preenchidos" . PHP_EOL;
 				$erros_estoques ++;
@@ -98,16 +113,18 @@ class Model_Verden_Kpl_EstoqueKpl extends Model_Verden_Kpl_KplWebService {
 			if ( $erros_estoques == 0 ) {
 				
 				try {
-					// Localizar Produto para atualizar estoque
-					$produto = ''; // Inserir informações do produto
-					if ( empty ( $produto ) ) {
-						echo "Atualizando Estoque " . $produto['SKU'] . PHP_EOL;
-						// DESCOMENTAR DEPOIS -- PARTE MAGENTO
-						$this->_atualizaEstoque(); // Atualizar estoque do produto
+					echo "Buscando cadastro do produto " . $dados_estoque['CodigoProduto'] . PHP_EOL;
+					$produto = $this->_magento->buscaProduto($dados_estoque	['CodigoProduto']);
+					if ( !empty ( $produto ) ) {
+						echo "Atualizando Estoque " . $dados_estoque['CodigoProduto'] . PHP_EOL;
+						$dados_estoque['product_id'] = $produto; // ID do Produto na Loja Magento
+						$this->_atualizaEstoque( $dados_estoque );
+						echo "Estoque atualizado. " . PHP_EOL;
+					}else{
+						throw new RuntimeException( 'Produto não encontrado' );
 					} 
 										
-					//devolver o protocolo do estoque DESCOMENTAR DEPOIS
-					//$this->_kpl->ConfirmarEstoquesDisponiveis ( $dados_precos ['ProtocoloEstoque'] );
+					$this->_kpl->ConfirmarEstoquesDisponiveis ( $dados_estoque ['ProtocoloEstoque'] );
 					echo "Protocolo Estoque: {$dados_estoque ['ProtocoloEstoque']} enviado com sucesso" . PHP_EOL;
 					echo PHP_EOL;				
 
@@ -119,6 +136,9 @@ class Model_Verden_Kpl_EstoqueKpl extends Model_Verden_Kpl_KplWebService {
 			
 			}
 		}		
+		
+		// finaliza sessão Magento
+		$this->_magento->_encerraSessao();
 		
 		if(is_array($array_erro)){
 			$array_retorno = $array_erro;
