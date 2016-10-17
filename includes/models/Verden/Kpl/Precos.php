@@ -139,7 +139,7 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 			if ( $erros_precos == 0 ) {
 				
 				try {
-					// Localizar Produto para atualizar preço
+					echo PHP_EOL;
 					echo "Buscando cadastro do produto " . $dados_precos['CodigoProduto'] . PHP_EOL;
 					$produto = $this->_magento->buscaProduto($dados_precos['CodigoProduto']);
 					if ( !empty ( $produto ) ) {

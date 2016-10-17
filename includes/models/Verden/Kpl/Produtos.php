@@ -199,6 +199,7 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 			if ( $erros_produtos == 0 ) {
 				
 				try {
+					echo PHP_EOL;
 					echo "Buscando cadastro do produto " . $dados_produtos ['SKU'] . PHP_EOL;
 					$produto = $this->buscaProduto ( $dados_produtos ['SKU'] );
 					if ( $produto == false ) {

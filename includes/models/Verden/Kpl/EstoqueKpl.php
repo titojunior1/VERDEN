@@ -113,6 +113,7 @@ class Model_Verden_Kpl_EstoqueKpl extends Model_Verden_Kpl_KplWebService {
 			if ( $erros_estoques == 0 ) {
 				
 				try {
+					echo PHP_EOL;
 					echo "Buscando cadastro do produto " . $dados_estoque['CodigoProduto'] . PHP_EOL;
 					$produto = $this->_magento->buscaProduto($dados_estoque	['CodigoProduto']);
 					if ( !empty ( $produto ) ) {
