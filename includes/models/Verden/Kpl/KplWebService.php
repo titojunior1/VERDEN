@@ -71,7 +71,7 @@ class Model_Verden_Kpl_KplWebService {
 			$this->_chave_identificacao = KPL_KEY;
 		
 		} catch ( Exception $e ) {
-			throw new Exception ( 'Erro ao conectar no WebService' );
+			throw new Exception ( 'Erro ao conectar no WebService da KPL' );
 		}
 	}
 	/**
@@ -374,7 +374,7 @@ class Model_Verden_Kpl_KplWebService {
 		}
 	
 		try {
-			$resultado = $this->_webservice->call ( 'ConfirmarRecebimentoEstoque', array ('ProtocoloPreco' => $protocoloEstoque ) );
+			$resultado = $this->_webservice->call ( 'ConfirmarRecebimentoEstoque', array ('ProtocoloEstoque' => $protocoloEstoque ) );
 			if ($resultado ['ConfirmarRecebimentoEstoqueResult'] ['Codigo'] == '200001') {
 				return true;
 			} else {

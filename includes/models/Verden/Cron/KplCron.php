@@ -33,6 +33,7 @@ class Model_Verden_Cron_KplCron {
 	public function AtualizaEstoqueKpl () {
 
 		ini_set ( 'memory_limit', '512M' );
+		ini_set ( 'default_socket_timeout', 120 );		
 			
 		if ( empty ( $this->_kpl ) ) {
 			$this->_kpl = new Model_Verden_Kpl_KplWebService();
@@ -198,6 +199,7 @@ class Model_Verden_Cron_KplCron {
 	public function CadastraProdutosKpl () {
 
 		ini_set ( 'memory_limit', '512M' );
+		ini_set ( 'default_socket_timeout', 120 );
 			
 		if ( empty ( $this->_kpl ) ) {
 			$this->_kpl = new Model_Verden_Kpl_KplWebService();

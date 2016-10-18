@@ -88,7 +88,7 @@ class Model_Verden_Magento_MagentoWebService {
 			$this->_webservice->decode_utf8 = true;			
 			
 		} catch ( Exception $e ) {
-			throw new Exception ( 'Erro ao conectar no WebService' );
+			throw new Exception ( 'Erro ao conectar no WebService da Magento' );
 		}
 	}	
 	
@@ -148,7 +148,7 @@ class Model_Verden_Magento_MagentoWebService {
 			$result = $this->_webservice->catalogProductCreate($this->_session, 'simple', $attributeSet->set_id, $sku, $produto);			
 		
 		} catch ( Exception $e ) {
-			throw new RuntimeException( 'Erro ao cadastrar Produto ' . $sku );
+			throw new RuntimeException( 'Erro ao cadastrar Produto ' . $sku . ' - ' . $e->getMessage() );
 		}
 		
 		return $result;
@@ -184,8 +184,8 @@ class Model_Verden_Magento_MagentoWebService {
 			$result = $this->_webservice->catalogProductInfo( $this->_session, $sku, null, null, 'sku' );
 			return $result->product_id;
 			
-		} catch (SoapFault $e) {
-			return false;
+		} catch (Exception $e) {
+			throw new RuntimeException( 'Erro ao buscar Produto ID ' . $sku . ' - ' . $e->getMessage() );
 		}
 	}
 	
