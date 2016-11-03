@@ -216,7 +216,7 @@ class Model_Verden_Cron_KplCron {
 				throw new Exception ( 'Erro ao buscar Produtos - ' . $produtos );
 			}
 			if ( $produtos ['ProdutosDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
-				echo "Não existem produtos disponíveis para integração" . PHP_EOL;
+				echo "Nao existem produtos disponiveis para integracao" . PHP_EOL;
 			} else {
 				
 				$kpl_produtos = new Model_Verden_Kpl_Produtos();
@@ -259,7 +259,7 @@ class Model_Verden_Cron_KplCron {
 				throw new Exception ( 'Erro ao buscar Preços - ' . $precos );
 			}
 			if ( $precos ['PrecosDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
-				echo "Não existem preços disponíveis para integração" . PHP_EOL;
+				echo "Nao existem precos disponiveis para integracao" . PHP_EOL;
 			} else {
 					
 				$kpl_preços = new Model_Verden_Kpl_Precos();

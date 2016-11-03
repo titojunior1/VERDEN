@@ -77,16 +77,16 @@ class Model_Verden_Kpl_EstoqueKpl extends Model_Verden_Kpl_KplWebService {
 			
 			foreach ( $request ["DadosEstoque"] as $i => $d ) {
 				
-				$array_estoques [0] ['ProtocoloEstoque'] = $d ['ProtocoloEstoque'];
-				$array_estoques [0] ['CodigoProduto'] = $d ['CodigoProduto'];
-				$array_estoques [0] ['CodigoProduto'] = $d ['CodigoProduto'];
-				$array_estoques [0] ['CodigoProdutoPai'] = $d ['CodigoProdutoPai'];
-				$array_estoques [0] ['CodigoProdutoAbacos'] = $d ['CodigoProdutoAbacos'];
-				$array_estoques [0] ['SaldoMinimo'] = $d ['SaldoMinimo'];
-				$array_estoques [0] ['SaldoDisponivel'] = $d ['SaldoDisponivel'];
-				$array_estoques [0] ['NomeAlmoxarifadoOrigem'] = $d ['NomeAlmoxarifadoOrigem'];
-				$array_estoques [0] ['IdentificadorProduto'] = $d ['IdentificadorProduto'];
-				$array_estoques [0] ['CodigoProdutoParceiro'] = $d ['CodigoProdutoParceiro'];
+				$array_estoques [$i] ['ProtocoloEstoque'] = $d ['ProtocoloEstoque'];
+				$array_estoques [$i] ['CodigoProduto'] = $d ['CodigoProduto'];
+				$array_estoques [$i] ['CodigoProduto'] = $d ['CodigoProduto'];
+				$array_estoques [$i] ['CodigoProdutoPai'] = $d ['CodigoProdutoPai'];
+				$array_estoques [$i] ['CodigoProdutoAbacos'] = $d ['CodigoProdutoAbacos'];
+				$array_estoques [$i] ['SaldoMinimo'] = $d ['SaldoMinimo'];
+				$array_estoques [$i] ['SaldoDisponivel'] = $d ['SaldoDisponivel'];
+				$array_estoques [$i] ['NomeAlmoxarifadoOrigem'] = $d ['NomeAlmoxarifadoOrigem'];
+				$array_estoques [$i] ['IdentificadorProduto'] = $d ['IdentificadorProduto'];
+				$array_estoques [$i] ['CodigoProdutoParceiro'] = $d ['CodigoProdutoParceiro'];
 			}
 		}
 		
@@ -122,7 +122,7 @@ class Model_Verden_Kpl_EstoqueKpl extends Model_Verden_Kpl_KplWebService {
 						$this->_atualizaEstoque( $dados_estoque );
 						echo "Estoque atualizado. " . PHP_EOL;
 					}else{
-						throw new RuntimeException( 'Produto não encontrado' );
+						throw new RuntimeException( 'Produto nao encontrado' );
 					} 
 										
 					$this->_kpl->ConfirmarEstoquesDisponiveis ( $dados_estoque ['ProtocoloEstoque'] );

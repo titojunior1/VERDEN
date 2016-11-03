@@ -113,7 +113,7 @@ class Model_Verden_Magento_MagentoWebService {
 			
 		}catch ( Exception $e ) {
 			$this->_session_valid = false;
-			throw new Exception ( 'Erro ao iniciar sessão no WebService' );
+			throw new Exception ( 'Erro ao iniciar sessao no WebService' );
 		}
 		
 	}
@@ -185,7 +185,8 @@ class Model_Verden_Magento_MagentoWebService {
 			return $result->product_id;
 			
 		} catch (Exception $e) {
-			throw new RuntimeException( 'Erro ao buscar Produto ID ' . $sku . ' - ' . $e->getMessage() );
+			return false;
+			//throw new RuntimeException( 'Erro ao buscar Produto ID ' . $sku . ' - ' . $e->getMessage() );
 		}
 	}
 	

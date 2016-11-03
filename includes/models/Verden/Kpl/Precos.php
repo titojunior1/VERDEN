@@ -101,19 +101,20 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 			
 			foreach ( $request ["DadosPreco"] as $i => $d ) {
 				
-			$array_precos [0] ['ProtocoloPreco'] = $d ['ProtocoloPreco'];
-			$array_precos [0] ['CodigoProduto'] = $d ['CodigoProduto'];
-			$array_precos [0] ['CodigoProdutoPai'] = $d ['CodigoProdutoPai'];
-			$array_precos [0] ['CodigoProdutoAbacos'] = $d ['CodigoProdutoAbacos'];
-			$array_precos [0] ['NomeLista'] = $d ['NomeLista'];
-			$array_precos [0] ['PrecoTabela'] = $d ['PrecoTabela'];
-			$array_precos [0] ['PrecoPromocional'] = $d ['PrecoPromocional'];
-			$array_precos [0] ['DataInicioPromocao'] = $d ['DataInicioPromocao'];
-			$array_precos [0] ['DataTerminoPromocao'] = $d ['DataTerminoPromocao'];
-			$array_precos [0] ['DescontoMaximoProduto'] = $d ['DescontoMaximoProduto'];
-			$array_precos [0] ['CodigoProdutoParceiro'] = $d ['CodigoProdutoParceiro'];
+				$array_precos [$i] ['ProtocoloPreco'] = $d ['ProtocoloPreco'];
+				$array_precos [$i] ['CodigoProduto'] = $d ['CodigoProduto'];
+				$array_precos [$i] ['CodigoProdutoPai'] = $d ['CodigoProdutoPai'];
+				$array_precos [$i] ['CodigoProdutoAbacos'] = $d ['CodigoProdutoAbacos'];
+				$array_precos [$i] ['NomeLista'] = $d ['NomeLista'];
+				$array_precos [$i] ['PrecoTabela'] = $d ['PrecoTabela'];
+				$array_precos [$i] ['PrecoPromocional'] = $d ['PrecoPromocional'];
+				$array_precos [$i] ['DataInicioPromocao'] = $d ['DataInicioPromocao'];
+				$array_precos [$i] ['DataTerminoPromocao'] = $d ['DataTerminoPromocao'];
+				$array_precos [$i] ['DescontoMaximoProduto'] = $d ['DescontoMaximoProduto'];
+				$array_precos [$i] ['CodigoProdutoParceiro'] = $d ['CodigoProdutoParceiro'];
 			}
 		}
+		
 		
 		$qtdPrecos = count($array_precos);
 		
