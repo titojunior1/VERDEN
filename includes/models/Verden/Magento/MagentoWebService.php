@@ -1,4 +1,5 @@
 <?php
+use Assert\InvalidArgumentException;
 /**
  * 
  * Classe para trabalhar com o Webservice da Magento(Stub de Serviço)
@@ -129,6 +130,48 @@ class Model_Verden_Magento_MagentoWebService {
 				
 		}catch ( Exception $e ) {			
 			throw new Exception ( 'Erro ao finalizar sessão no WebService' );
+		}
+	
+	}
+	
+	public function buscaClientesDisponiveis( $complexFilter ){
+	
+		if($this->_session_valid == false){
+			$this->_iniciaSessao();
+		}
+		
+		if (! is_array( $complexFilter ) ){
+			throw new InvalidArgumentException( 'Filtro informado inválido' );
+		}
+	
+		try {
+	
+			$result = $this->_webservice->customerCustomerList($this->_session, $complexFilter);
+			return $result;
+	
+		} catch ( Exception $e ) {
+			throw new RuntimeException( 'Erro ao consultar clientes disponíveis' . ' - ' . $e->getMessage() );
+		}	
+	
+	}
+	
+	public function buscaPedidosDisponiveis( $complexFilter ){
+	
+		if($this->_session_valid == false){
+			$this->_iniciaSessao();
+		}
+	
+		if (! is_array( $complexFilter ) ){
+			throw new InvalidArgumentException( 'Filtro informado inválido' );
+		}
+	
+		try {
+	
+			$result = $this->_webservice->salesOrderList($this->_session, $complexFilter);
+			return $result;
+	
+		} catch ( Exception $e ) {
+			throw new RuntimeException( 'Erro ao consultar pedidos disponiveis' . ' - ' . $e->getMessage() );
 		}
 	
 	}

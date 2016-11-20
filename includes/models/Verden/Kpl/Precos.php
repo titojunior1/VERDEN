@@ -75,7 +75,7 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 	 */
 	function ProcessaPrecosWebservice ( $request ) {
 
-		// produtos
+		// erros
 		$erro = null;
 		
 		// coleção de erros, no formato $array_erros[$registro][] = erro

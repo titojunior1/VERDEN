@@ -153,15 +153,14 @@ class Model_Verden_Cron_KplCron {
 	 */
 	public function CadastraPedidosSaidaKpl () {
 
-		//ini_set ( 'memory_limit', '-1' );
 		ini_set ( 'memory_limit', '512M' );
 		
 		// Solicita Pedidos Saida Disponíveis
 			if ( empty ( $this->_kpl ) ) {
-				$this->_kpl = new Model_Wms_Kpl_KplWebService ( $cli_id );
+				$this->_kpl = new Model_Verden_Kpl_KplWebService();
 			}
 			
-			echo "- importando pedidos de saída do cliente {$cli_id}, warehouse {$empwh_id} - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
+			echo "- importando pedidos de saída do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
 			try {
 				$chaveIdentificacao = KPL_KEY;
 				$pedidos_disponiveis = $this->_kpl->PedidosDisponiveis ( $chaveIdentificacao );
@@ -169,25 +168,25 @@ class Model_Verden_Cron_KplCron {
 					throw new Exception ( 'Erro ao buscar notas de saída' );
 				}
 				if ( $pedidos_disponiveis ['PedidosDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
-					echo "Não existem pedidos de saída disponíveis para integração".PHP_EOL;
+					echo "Nao existem pedidos de saida disponiveis para integracao ".PHP_EOL;
 
 				}else{
-					$kpl = new Model_Wms_Kpl_Pedido ( $cli_id, $empwh_id );
+					$kpl = new Model_Verden_Kpl_Pedido();
 					$retorno = $kpl->ProcessaArquivoSaidaWebservice ( $pedidos_disponiveis ['PedidosDisponiveisResult'] );
 						if(is_array($retorno)){
 							// gravar logs de erro						
-							$this->_log->gravaLogErros($cron_id, $retorno);					
+							$this->_log->gravaLogErros($retorno);					
 						}	
 					}
 
-					echo "- importação de pedidos do cliente {$cli_id} realizada com sucesso" . PHP_EOL;
+					echo "- importacao de pedidos do cliente Verden realizada com sucesso " . PHP_EOL;
 					
 			} catch ( Exception $e ) {
-				echo "- erros ao importar os pedidos de saída do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
+				echo "- erros ao importar os pedidos de saída do cliente Verden: " . $e->getMessage () . PHP_EOL;
 			}
 			unset ( $this->_kpl );
 		
-		echo "- Finalizando cron para cadastrar pedidos de saída da Kpl" . PHP_EOL;
+		echo "- Finalizando cron para cadastrar pedidos de saída da Kpl do cliente Verden " . PHP_EOL;
 		
 	}
 

@@ -217,14 +217,9 @@ final class Model_Verden_Kpl_Pedido extends Model_Verden_Kpl_KplWebService {
 	function ProcessaArquivoSaidaWebservice ( $request ) {
 
 		if ( empty ( $this->_kpl ) ) {
-			$this->_kpl = new Model_Wms_Kpl_KplWebService ( $this->_cli_id );
+			$this->_kpl = new Model_Verden_Kpl_KplWebService();
 		}
 		
-		global $app;
-		
-		// cria instância do banco de dados
-		$db = Db_Factory::getDbWms ();
-		$dp = array ();
 		// array para retorno dos dados ao webservice
 		$array_retorno = array ();
 		
@@ -237,15 +232,6 @@ final class Model_Verden_Kpl_Pedido extends Model_Verden_Kpl_KplWebService {
 		// array de controle (para criação dos objetos de pedidos) onde o valor será: pedido;nota_fiscal
 		$array_pedidos = array ();
 		
-		// criar movimento - inserir os dados na tabela movimentos
-		$sql = "INSERT INTO movimentos (cli_id,climov_data,climov_horainicio,climov_upload,climov_tipo) VALUES({$this->_cli_id},'" . date ( 'Y-m-d' ) . "','" . date ( 'H:i:s' ) . "',1,'S')";
-		if ( ! $db->Execute ( $sql ) ) {
-			throw new RuntimeException ( 'Erro ao criar movimento' );
-		}
-		
-		//pega o último id inserido
-		$this->_climov_id = $db->LastInsertId ();
-		
 		if ( ! is_array ( $request ['Rows'] ['DadosPedidosDisponiveisWeb'] [0] ) ) {
 			$pedido_mestre [0] = $request ['Rows'] ['DadosPedidosDisponiveisWeb'];
 		
@@ -256,11 +242,9 @@ final class Model_Verden_Kpl_Pedido extends Model_Verden_Kpl_KplWebService {
 		foreach ( $pedido_mestre as $i => $d ) {
 			
 			try {
-				// pedido de saída
-				$ns = new NotasSaida ( $this->_cli_id, $this->_empwh_id );
 				
 				// campos 1 a 13
-				$d ['PedidoWeb'] ['Rows'] ['DadosPedidoWeb'] ['NumeroPedido'] = $this->_cli_id != 66 ?  $d ['PedidoWeb'] ['Rows'] ['DadosPedidoWeb'] ['CodigoPedido']: $d ['PedidoWeb'] ['Rows'] ['DadosPedidoWeb'] ['NumeroPedido'];
+				$d ['PedidoWeb'] ['Rows'] ['DadosPedidoWeb'] ['NumeroPedido'] = $d ['PedidoWeb'] ['Rows'] ['DadosPedidoWeb'] ['NumeroPedido'];
 	
 				$ns->__set ( 'not_pedido', $d ['PedidoWeb'] ['Rows'] ['DadosPedidoWeb'] ['NumeroPedido'] );
 				$data = substr ( $d ['PedidoWeb'] ['Rows'] ['DadosPedidoWeb'] ['DataVenda'], 0, 8 );
