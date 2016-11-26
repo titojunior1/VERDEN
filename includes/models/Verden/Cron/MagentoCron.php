@@ -165,7 +165,7 @@ class Model_Verden_Cron_MagentoCron {
 			try {
 				
 				$pedidos_disponiveis = $this->_magento->buscaPedidosDisponiveis($complexFilter);
-				if ( ! is_array ( $pedidos_disponiveis ['PedidosDisponiveisResult'] ) ) {
+				if ( ! is_array ( $pedidos_disponiveis ) ) {
 					throw new Exception ( 'Erro ao buscar notas de saída' );
 				}
 				if ( $pedidos_disponiveis ['PedidosDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
@@ -173,7 +173,7 @@ class Model_Verden_Cron_MagentoCron {
 
 				}else{
 					$magento = new Model_Verden_Magento_Pedidos();
-					$retorno = $magento->ProcessaPedidosWebservice ( $pedidos_disponiveis ['PedidosDisponiveisResult'] );
+					$retorno = $magento->ProcessaPedidosWebservice ( $pedidos_disponiveis );
 						if(is_array($retorno)){
 							// gravar logs de erro						
 							$this->_log->gravaLogErros($retorno);					

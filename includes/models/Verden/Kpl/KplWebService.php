@@ -187,6 +187,27 @@ class Model_Verden_Kpl_KplWebService {
 		}
 		return $mensagem;
 	}
+	
+	public function cadastraCliente ($chaveIdentificacao, $dadosCliente){
+		try {			
+			return $this->_wsCall ( 'CadastrarCliente', array ('ChaveIdentificacao' => $chaveIdentificacao,
+															   'ListaDeClientes' => $dadosCliente ) );
+		} catch ( Exception $e ) {
+			throw new RuntimeException ( $e->getMessage () );
+		}
+	}
+	
+	public function cadastraPedidoKpl ($chaveIdentificacao, $dadosPedido){
+		try {
+			return $this->_wsCall ( 'InserirPedido', array (
+															'ChaveIdentificacao' => $chaveIdentificacao,
+															'ListaDePedidos' => 'DadosPedidos' => $dadosPedido,
+															) );
+		} catch ( Exception $e ) {
+			throw new RuntimeException ( $e->getMessage () );
+		}
+	}
+	
 	/**
 	 * Confirma o cadastro do fornecedor para a KPL.
 	 * @param string $protocoloFornecedor
