@@ -152,11 +152,22 @@ class Model_Verden_Cron_MagentoCron {
 			$timestamp = '2016-08-19 19:20:00';
 			
 			//Filtro para consulta em ambiente Magento com base na data atual regredindo 5 horas
+		
+			
 			$complexFilter = array(
 					'complex_filter' => array(
 							array(
 									'key' => 'created_at',
 									'value' => array('key' => 'gt', 'value' => $timestamp)
+							)
+					)
+			);
+			
+			$complexFilter = array(
+					'complex_filter' => array(
+							array(
+									'key' => 'increment_id',
+									'value' => array('key' => 'eq', 'value' => 100267826)
 							)
 					)
 			);
@@ -168,6 +179,7 @@ class Model_Verden_Cron_MagentoCron {
 				if ( ! is_array ( $pedidos_disponiveis ) ) {
 					throw new Exception ( 'Erro ao buscar notas de saída' );
 				}
+				var_dump($pedidos_disponiveis);
 				if ( $pedidos_disponiveis ['PedidosDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
 					echo "Nao existem pedidos de saida disponiveis para integracao ".PHP_EOL;
 

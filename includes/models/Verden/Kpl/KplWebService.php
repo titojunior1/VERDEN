@@ -201,8 +201,11 @@ class Model_Verden_Kpl_KplWebService {
 		try {
 			return $this->_wsCall ( 'InserirPedido', array (
 															'ChaveIdentificacao' => $chaveIdentificacao,
-															'ListaDePedidos' => 'DadosPedidos' => $dadosPedido,
-															) );
+															'ListaDePedidos' => array( 
+																						'DadosPedidos' => $dadosPedido
+																					 )
+															) 
+								  );
 		} catch ( Exception $e ) {
 			throw new RuntimeException ( $e->getMessage () );
 		}

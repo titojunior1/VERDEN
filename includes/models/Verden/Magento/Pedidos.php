@@ -54,17 +54,17 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			
 			//Manipulando dados para cadastro/atualização de cliente 
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Email'] = $d->email;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['CPFouCNPJ'] = $d->taxvat;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Codigo'] = 1;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['CPFouCNPJ'] = $d->customer_taxvat;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Codigo'] = $d->customer_taxvat;
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['TipoPessoa'] = $d->CodigoProdutoAbacos; //Validar PF ou PJ
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Documento'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Nome'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['NomeReduzido'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Sexo'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['DataNascimento'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Telefone'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Celular'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['DataCadastro'] = 1;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Documento'] = '';
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Nome'] = $d->firstname.' '.$d->lastname;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['NomeReduzido'] = $d->firstname;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Sexo'] = ($d->customer_gender == '1')? 'Masculino':'Feminino';
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['DataNascimento'] = '';
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Telefone'] = $d->telephone;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Celular'] = '';
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['DataCadastro'] = 11;
 			// Dados do Endereço
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Logradouro'] = 1;
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['NumeroLogradouro'] = 1;
@@ -189,9 +189,20 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			
 			
 			try {
+				
 				echo "Criando pedido " . $dadosPedido [$i] ['NumeroDoPedido'] . PHP_EOL;
 				$this->_kpl->cadastraPedido( $dadosPedido );
 				echo "Pedido importado" . PHP_EOL;
+				
+				$order = Mage::getModel('sales/order')->loadByIncrementId($dadosPedido [$i] ['NumeroDoPedido']);
+				$state = 'processing';
+				$status = 'Em Separação'; //status criado por nós anteriormente.
+				$comment = '';
+				$order->setState($state, $status, $comment, false);
+				$order->save();
+				
+				
+				
 			} catch (Exception $e) {
 				echo "Erro ao importar pedido " . $dadosPedido [$i] ['NumeroDoPedido'] . PHP_EOL;
 				throw new RuntimeException('Erro: ' . $e->getMessage());
