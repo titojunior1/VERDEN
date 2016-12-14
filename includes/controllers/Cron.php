@@ -77,8 +77,8 @@ class Controller_Cron {
 	 * @todo Tratar parâmetro de ajuda.
 	 * @param array $arg
 	 */
-	public static function executar($arg) {
-
+	public static function executar($arg) {		
+		
 		echo PHP_EOL;
 		echo str_repeat ( '-', 70 ) . PHP_EOL;
 		echo 'Execucao de Cron Jobs' . PHP_EOL;

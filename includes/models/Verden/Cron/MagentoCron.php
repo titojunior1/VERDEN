@@ -20,7 +20,7 @@ class Model_Verden_Cron_MagentoCron {
 	 * @param 
 	 */
 	public function __construct () {
-
+		
 		echo "- Iniciando Cron para processar integracao com sistema ERP Magento via webservice" . PHP_EOL;
 		
 	}
@@ -131,7 +131,7 @@ class Model_Verden_Cron_MagentoCron {
 	 * Cadastrar Pedidos Saida do Magento
 	 */
 	public function CadastraPedidosSaidaMagento () {
-
+	
 		ini_set ( 'memory_limit', '512M' );
 		
 		// Solicita Pedidos Saida Disponíveis

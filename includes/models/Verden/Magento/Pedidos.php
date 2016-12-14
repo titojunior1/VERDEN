@@ -32,6 +32,145 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 	}
 	
 	/**
+	 * Verificar CNPJ
+	 * @param int $cnpj
+	 * @param bool $formatar
+	 * @return string | bool
+	 */
+	public static function validaCnpj($cnpj, $formatar = false) {
+	
+		// remove tudo que não for número
+		$cnpj = self::Numeros ( $cnpj );
+	
+		if ($formatar) {
+			$cnpj_formatado = substr ( $cnpj, 0, 2 ) . '.' . substr ( $cnpj, 2, 3 ) . '.' . substr ( $cnpj, 5, 3 ) . '/' . substr ( $cnpj, 8, 4 ) . '-' . substr ( $cnpj, 12, 2 );
+			return $cnpj_formatado;
+		} else {
+			// cpf falso
+			$array_cnpj_falso = array ( '00000000000000', '11111111111111', '22222222222222', '33333333333333', '44444444444444', '55555555555555', '66666666666666', '77777777777777', '88888888888888', '99999999999999', '12345678912345' );
+				
+			if (empty ( $cnpj ) || strlen ( $cnpj ) != 14 || in_array ( $cnpj, $array_cnpj_falso )) {
+				return false;
+			} else {
+	
+				$rev_cnpj = strrev ( substr ( $cnpj, 0, 12 ) );
+				for($i = 0; $i <= 11; $i ++) {
+					$i == 0 ? $multiplier = 2 : $multiplier;
+					$i == 8 ? $multiplier = 2 : $multiplier;
+					$multiply = ($rev_cnpj [$i] * $multiplier);
+					$sum = $sum + $multiply;
+					$multiplier ++;
+				}
+	
+				$rest = $sum % 11;
+				if ($rest == 0 || $rest == 1) {
+					$dv1 = 0;
+				} else {
+					$dv1 = 11 - $rest;
+				}
+	
+				$sub_cnpj = substr ( $cnpj, 0, 12 );
+				$rev_cnpj = strrev ( $sub_cnpj . $dv1 );
+				unset ( $sum );
+	
+				for($i = 0; $i <= 12; $i ++) {
+					$i == 0 ? $multiplier = 2 : $multiplier;
+					$i == 8 ? $multiplier = 2 : $multiplier;
+					$multiply = ($rev_cnpj [$i] * $multiplier);
+					$sum = $sum + $multiply;
+					$multiplier ++;
+				}
+				$rest = $sum % 11;
+	
+				if ($rest == 0 || $rest == 1) {
+					$dv2 = 0;
+				} else {
+					$dv2 = 11 - $rest;
+				}
+	
+				if ($dv1 == $cnpj [12] && $dv2 == $cnpj [13]) {
+					return true;
+				} else {
+					return false;
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Verificar CPF
+	 * @param int $cpf
+	 * @param bool $formatar
+	 * @return string | bool
+	 */
+	public static function validaCpf($cpf, $formatar = false) {
+		if ($formatar) {
+				
+			$cpf = self::Numeros ( $cpf );
+			$cpf_formatado = substr ( $cpf, 0, 3 ) . '.' . substr ( $cpf, 3, 3 ) . '.' . substr ( $cpf, 6, 3 ) . '-' . substr ( $cpf, 9, 2 );
+			return $cpf_formatado;
+		} else {
+			// cpf falso
+			$array_cpf_falso = array ( '00000000000', '11111111111', '22222222222', '33333333333', '44444444444', '55555555555', '66666666666', '77777777777', '88888888888', '99999999999', '12345678912' );
+				
+			// remove tudo que não for número
+			$cpf = self::Numeros ( $cpf );
+				
+			if (empty ( $cpf ) || strlen ( $cpf ) != 11 || in_array ( $cpf, $array_cpf_falso )) {
+				return false;
+			} else {
+	
+				$sub_cpf = substr ( $cpf, 0, 9 );
+	
+				for($i = 0; $i <= 9; $i ++) {
+					$dv += ($sub_cpf [$i] * (10 - $i));
+				}
+	
+				if ($dv == 0) {
+					return false;
+				}
+	
+				$dv = 11 - ($dv % 11);
+	
+				if ($dv > 9) {
+					$dv = 0;
+				}
+	
+				if ($cpf [9] != $dv) {
+					return false;
+				}
+	
+				$dv *= 2;
+	
+				for($i = 0; $i <= 9; $i ++) {
+					$dv += ($sub_cpf [$i] * (11 - $i));
+				}
+	
+				$dv = 11 - ($dv % 11);
+	
+				if ($dv > 9) {
+					$dv = 0;
+				}
+	
+				if ($cpf [10] != $dv) {
+					return false;
+				}
+	
+				return true;
+			}
+		}
+	}
+	
+	/**
+	 * Deixa somente os números
+	 * @param string $var
+	 * @return string
+	 */
+	public static function Numeros($var) {
+		return preg_replace ( '/[^0-9]/i', '', $var );
+	}	
+	
+	/**
 	 *
 	 * Processar cadastro de clientes via webservice.
 	 * @param array $request
@@ -52,54 +191,79 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			$dadosCliente = array();
 			$dadosPedido = array();
 			
+			// formatar CPF
+			$cpfFormatado = $this->Numeros($d->customer_taxvat);
+			// formata sexo
+			$sexoCliente = ($d->customer_gender == '1')? 'tseMasculino':'tseFeminino';
+			
 			//Manipulando dados para cadastro/atualização de cliente 
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Email'] = $d->email;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['CPFouCNPJ'] = $d->customer_taxvat;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Codigo'] = $d->customer_taxvat;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['TipoPessoa'] = $d->CodigoProdutoAbacos; //Validar PF ou PJ
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['CPFouCNPJ'] = $cpfFormatado;			
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Codigo'] = $cpfFormatado;
+			
+			//valida se é pessoa PF, caso não é PJ
+			$validaCpf = $this->validaCpf($d->customer_taxvat);
+			if ( $validaCpf ){				
+				$tipoPessoa = 'tpeFisica';
+			}else{
+				$tipoPessoa = 'tpeJuridica';
+			}			
+			
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['TipoPessoa']	= $tipoPessoa;		 
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Documento'] = '';
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Nome'] = $d->firstname.' '.$d->lastname;
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['NomeReduzido'] = $d->firstname;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Sexo'] = ($d->customer_gender == '1')? 'Masculino':'Feminino';
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Sexo'] = $sexoCliente;
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['DataNascimento'] = '';
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Telefone'] = $d->telephone;
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Celular'] = '';
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['DataCadastro'] = 11;
-			// Dados do Endereço
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Logradouro'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['NumeroLogradouro'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['ComplementoEndereco'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Bairro'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Municipio'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Estado'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Cep'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['TipoLocalEntrega'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['ReferenciaEndereco'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Pais'] = 1;						
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['DataCadastro'] = '';
+			
+			$infosAdicionaisPedido = $this->_magento->buscaInformacoesAdicionaisPedido($d->increment_id);
+
+			$cepEntregaFormatado = $this->Numeros($infosAdicionaisPedido->shipping_address->postcode);
+			$cepCobrancaFormatado = $this->Numeros($infosAdicionaisPedido->shipping_address->postcode);
+			
+			// Dados do Endereço			
+			list($dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Logradouro'],
+				 $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['NumeroLogradouro'],
+				 $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['ComplementoEndereco'],
+				 $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Bairro']
+				) = explode("\n", $infosAdicionaisPedido->shipping_address->street);		
+			
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Municipio'] = $infosAdicionaisPedido->shipping_address->city;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Estado'] = $infosAdicionaisPedido->shipping_address->region;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Cep'] = $cepEntregaFormatado;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['TipoLocalEntrega'] = 'tleeDesconhecido'; // informação não vem da magento
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['ReferenciaEndereco'] = '';
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Pais'] = $infosAdicionaisPedido->shipping_address->country_id;						
 			// Dados do Endereço de Cobrança
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Logradouro'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['NumeroLogradouro'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['ComplementoEndereco'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Bairro'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Municipio'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Estado'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Cep'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['TipoLocalEntrega'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['ReferenciaEndereco'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Pais'] = 1;			
+			list($dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Logradouro'],
+				 $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['NumeroLogradouro'],
+			     $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['ComplementoEndereco'],
+				 $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Bairro']
+			) = explode("\n", $infosAdicionaisPedido->billing_address->street);
+			
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Municipio'] = $infosAdicionaisPedido->billing_address->city;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Estado'] = $infosAdicionaisPedido->billing_address->region;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Cep'] = $cepCobrancaFormatado;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['TipoLocalEntrega'] = 'tleeDesconhecido'; // informação não vem da magento
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['ReferenciaEndereco'] = '';
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndCobranca'] ['Pais'] = $infosAdicionaisPedido->billing_address->country_id;			
 			// Dados do Endereço de Entrega
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Logradouro'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['NumeroLogradouro'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['ComplementoEndereco'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Bairro'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Municipio'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Estado'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Cep'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['TipoLocalEntrega'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['ReferenciaEndereco'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Pais'] = 1;			
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['ClienteEstrangeiro'] = 1;
-			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['RegimeTributario'] = 1;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Logradouro'] = $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Logradouro'];
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['NumeroLogradouro'] = $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['NumeroLogradouro'];
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['ComplementoEndereco'] = $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['ComplementoEndereco'];
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Bairro'] = $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Bairro'];
+			
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Municipio'] = $infosAdicionaisPedido->shipping_address->city;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Estado'] = $infosAdicionaisPedido->shipping_address->region;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Cep'] = $cepEntregaFormatado;
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['TipoLocalEntrega'] = 'tleeDesconhecido'; // informação não vem da magento
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['ReferenciaEndereco'] = '';
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Pais'] = $infosAdicionaisPedido->shipping_address->country_id;						
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['ClienteEstrangeiro'] = '';
+			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['RegimeTributario'] = '';
 
 			echo "Conectando ao WebService Kpl... " . PHP_EOL;
 			$this->_kpl = new Model_Verden_Kpl_Clientes();
@@ -116,77 +280,84 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			}
 			
 			//Seguindo com criação de Pedidos
-			$dadosPedido [$i] ['NumeroDoPedido'] = 1;
-			$dadosPedido [$i] ['Email'] = 1;
-			$dadosPedido [$i] ['CPFouCNPJ'] = 1;
-			$dadosPedido [$i] ['ValorPedido'] = 1;
-			$dadosPedido [$i] ['ValorFrete'] = 1;
-			$dadosPedido [$i] ['ValorEncargos'] = 1;
-			$dadosPedido [$i] ['ValorDesconto'] = 1;
-			$dadosPedido [$i] ['ValorEmbalagemPresente'] = 1;
-			$dadosPedido [$i] ['ValorReceberEntrega'] = 1;
-			$dadosPedido [$i] ['ValorTrocoEntrega'] = 1;
-			$dadosPedido [$i] ['DataVenda'] = 1;
-			$dadosPedido [$i] ['Transportadora'] = 1;
+			$dadosPedido [$i] ['NumeroDoPedido'] = $infosAdicionaisPedido->increment_id;
+			$dadosPedido [$i] ['Email'] = $infosAdicionaisPedido->customer_email;
+			$dadosPedido [$i] ['CPFouCNPJ'] = $infosAdicionaisPedido->$cpfFormatado;
+			$dadosPedido [$i] ['ValorPedido'] = $infosAdicionaisPedido->price; // Formatar depois
+			$dadosPedido [$i] ['ValorFrete'] = $infosAdicionaisPedido->shipping_amount;
+			$dadosPedido [$i] ['ValorEncargos'] = $infosAdicionaisPedido->customer_email;
+			$dadosPedido [$i] ['ValorDesconto'] = $infosAdicionaisPedido->discount_amount;
+			$dadosPedido [$i] ['ValorEmbalagemPresente'] = '';
+			$dadosPedido [$i] ['ValorReceberEntrega'] = '';
+			$dadosPedido [$i] ['ValorTrocoEntrega'] = '';
+			$dadosPedido [$i] ['DataVenda'] = $infosAdicionaisPedido->created_at;
+			$dadosPedido [$i] ['Transportadora'] = $infosAdicionaisPedido->axado_tnt;
 			$dadosPedido [$i] ['EmitirNotaSimbolica'] = 0; //Boolean
 			$dadosPedido [$i] ['Lote'] = 1; // Cadastrar um Padrão KPL
-			$dadosPedido [$i] ['DestNome'] = 1;
-			$dadosPedido [$i] ['DestSexo'] = 1;
-			$dadosPedido [$i] ['DestEmail'] = 1;
-			$dadosPedido [$i] ['DestTelefone'] = 1;
-			$dadosPedido [$i] ['DestLogradouro'] = 1;
-			$dadosPedido [$i] ['DestNumeroLogradouro'] = 1;
-			$dadosPedido [$i] ['DestComplementoEndereco'] = 1;
-			$dadosPedido [$i] ['DestBairro'] = 1;
-			$dadosPedido [$i] ['DestMunicipio'] = 1;
-			$dadosPedido [$i] ['DestEstado'] = 1;
-			$dadosPedido [$i] ['DestCep'] = 1;
-			$dadosPedido [$i] ['DestTipoLocalEntrega'] = 1;
-			$dadosPedido [$i] ['DestEstrangeiro'] = 1;
-			$dadosPedido [$i] ['DestPais'] = 1;
-			$dadosPedido [$i] ['DestCPF'] = 1;
-			$dadosPedido [$i] ['DestTipoPessoa'] = 1;
-			$dadosPedido [$i] ['DestDocumento'] = 1;
-			$dadosPedido [$i] ['DestInscricaoEstadual'] = 1;
-			$dadosPedido [$i] ['DestReferencia'] = 1;
-			$dadosPedido [$i] ['PedidoJaPago'] = 1;
-			$dadosPedido [$i] ['DataDoPagamento'] = 1;
-			$dadosPedido [$i] ['OptouNFPaulista'] = 1;
-			$dadosPedido [$i] ['CartaoPresenteBrinde'] = 1;
-			// Formas de pagamento
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['FormaPagamentoCodigo'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['Valor'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNumero'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoSeguranca'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoValidade'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNomeImpresso'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoQtdeParcelas'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoAutorizacao'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoVencimento'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoNumeroBancario'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCPFouCNPJTitular'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoDataNascimentoTitular'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaNumeroBanco'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaCodigoAgencia'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVCodigoAgencia'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaContaCorrente'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVContaCorrente'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['PreAutorizadaNaPlataforma'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVContaCorrente'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoTID'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNSU'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNumeroToken'] = 1;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CodigoTransacaoGateway'] = 1;
-			// Itens
-			$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] ['CodigoProduto'] = 1;
-			$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] ['QuantidadeProduto'] = 1;
-			$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] ['PrecoUnitario'] = 1;
-			$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] ['EmbalagemPresente'] = 1;
-			$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] ['MensagemPresente'] = 1;
-			$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] ['PrecoUnitarioBruto'] = 1;
-			$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] ['Brinde'] = 1;
-			$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] ['ValorReferencia'] = 1;
+			$dadosPedido [$i] ['DestNome'] = $infosAdicionaisPedido->shipping_address->firstname . ' ' . $infosAdicionaisPedido->shipping_address->lastname ;
+			$dadosPedido [$i] ['DestSexo'] = $sexoCliente;
+			$dadosPedido [$i] ['DestEmail'] = $infosAdicionaisPedido->customer_email;
+			$dadosPedido [$i] ['DestTelefone'] = $infosAdicionaisPedido->shipping_address->telephone;
 			
+			// Dados do Endereço
+			list($dadosPedido [$i] ['DestLogradouro'],
+				 $dadosPedido [$i] ['DestNumeroLogradouro'],
+				 $dadosPedido [$i] ['DestComplementoEndereco'],
+				 $dadosPedido [$i] ['DestBairro']
+			) = explode("\n", $infosAdicionaisPedido->shipping_address->street);
+			
+			
+			$dadosPedido [$i] ['DestMunicipio'] = $infosAdicionaisPedido->billing_address->city;
+			$dadosPedido [$i] ['DestEstado'] = $infosAdicionaisPedido->shipping_address->region;
+			$dadosPedido [$i] ['DestCep'] = $cepEntregaFormatado;
+			$dadosPedido [$i] ['DestTipoLocalEntrega'] = 'tleeDesconhecido';
+			$dadosPedido [$i] ['DestEstrangeiro'] = '';
+			$dadosPedido [$i] ['DestPais'] = $infosAdicionaisPedido->shipping_address->country_id;
+			$dadosPedido [$i] ['DestCPF'] = $cpfFormatado;
+			$dadosPedido [$i] ['DestTipoPessoa'] = $tipoPessoa;
+			$dadosPedido [$i] ['DestDocumento'] = $cpfFormatado;
+			$dadosPedido [$i] ['DestInscricaoEstadual'] = '';
+			$dadosPedido [$i] ['DestReferencia'] = "";
+			$dadosPedido [$i] ['PedidoJaPago'] = 1; //Boolean
+			$dadosPedido [$i] ['DataDoPagamento'] = '';
+			$dadosPedido [$i] ['OptouNFPaulista'] = ''; //Necessário verificar essa opção
+			//$dadosPedido [$i] ['CartaoPresenteBrinde'] = 1;
+			
+			// Formas de pagamento devem ser tratadas caso a caso
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['FormaPagamentoCodigo'] = $infosAdicionaisPedido->payment->method;
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['Valor'] = $infosAdicionaisPedido->payment->amount_ordered;
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNumero'] = $infosAdicionaisPedido->payment->cc_number_enc;
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoSeguranca'] = $infosAdicionaisPedido->payment->cc_last4;
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoValidade'] = $infosAdicionaisPedido->payment->cc_exp_month. '/' .$infosAdicionaisPedido->payment->cc_exp_year;
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNomeImpresso'] = $infosAdicionaisPedido->payment->cc_owner;
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoQtdeParcelas'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoAutorizacao'] = ''; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoVencimento'] = ''; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoNumeroBancario'] = ''; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCPFouCNPJTitular'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoDataNascimentoTitular'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaNumeroBanco'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaCodigoAgencia'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVCodigoAgencia'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaContaCorrente'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVContaCorrente'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['PreAutorizadaNaPlataforma'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVContaCorrente'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoTID'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNSU'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNumeroToken'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CodigoTransacaoGateway'] = 1; // Necessário integrar API pagar.me
+			// Itens
+			foreach ($infosAdicionaisPedido->items as $it => $item){
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['CodigoProduto'] = $item->sku;
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['QuantidadeProduto'] = (int) $item->qty_ordered;
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitario'] = $item->original_price;
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['EmbalagemPresente'] = '';
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['MensagemPresente'] = $item->gift_message_available;
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitarioBruto'] = $item->price;
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['Brinde'] = '';
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['ValorReferencia'] = '';
+			}
 			
 			try {
 				

@@ -1,6 +1,4 @@
 <?php
-
-use Mockery\Exception\RuntimeException;
 /**
  * 
  * Classe para processar o cadastro de clientes via webservice do ERP KPL - Ábacos 
@@ -44,7 +42,7 @@ class Model_Verden_Kpl_Clientes extends Model_Verden_Kpl_KplWebService {
 
 		$retorno = $this->_kpl->cadastraCliente($this->_chaveIdentificacao, $dadosCliente);
 		
-		if ( $retorno ['CadastrarClienteResult'] ['Rows'] ['DadosClientesResultado'] ['Resultado'] ['Codigo'] == '200001' ){
+		if ( $retorno ['CadastrarClienteResult'] ['Rows'] ['DadosClientesResultado'] ['Resultado'] ['Codigo'] == '200002' ){
 			return true;
 		}else{
 			throw new RuntimeException('Erro ao cadastrar cliente ' . $retorno ['CadastrarClienteResult'] ['Rows'] ['DadosClientesResultado'] );

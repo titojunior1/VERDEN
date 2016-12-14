@@ -176,6 +176,27 @@ class Model_Verden_Magento_MagentoWebService {
 	
 	}
 	
+	public function buscaInformacoesAdicionaisPedido( $idPedido ){
+	
+		if($this->_session_valid == false){
+			$this->_iniciaSessao();
+		}
+	
+		if ( empty( $idPedido ) ){
+			throw new InvalidArgumentException( 'ID de Pedido inválido' );
+		}
+	
+		try {
+	
+			$result = $this->_webservice->salesOrderInfo($this->_session, $idPedido);
+			return $result;
+	
+		} catch ( Exception $e ) {
+			throw new RuntimeException( 'Erro ao consultar pedido' . ' - ' . $e->getMessage() );
+		}
+	
+	}
+	
 	public function cadastraProduto( $sku, $produto ){
 		
 		if($this->_session_valid == false){
