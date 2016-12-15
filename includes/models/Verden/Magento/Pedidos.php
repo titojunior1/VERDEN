@@ -1,5 +1,4 @@
 <?php
-use Mockery\Exception\RuntimeException;
 /**
  *
  * Classe para processar o cadastro de Pedidos via webservice no ERP da Magento
@@ -222,7 +221,7 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			$infosAdicionaisPedido = $this->_magento->buscaInformacoesAdicionaisPedido($d->increment_id);
 
 			$cepEntregaFormatado = $this->Numeros($infosAdicionaisPedido->shipping_address->postcode);
-			$cepCobrancaFormatado = $this->Numeros($infosAdicionaisPedido->shipping_address->postcode);
+			$cepCobrancaFormatado = $this->Numeros($infosAdicionaisPedido->billing_address->postcode);
 			
 			// Dados do Endereço			
 			list($dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Endereco'] ['Logradouro'],
@@ -281,16 +280,24 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			
 			//Seguindo com criação de Pedidos
 			$dadosPedido [$i] ['NumeroDoPedido'] = $infosAdicionaisPedido->increment_id;
-			$dadosPedido [$i] ['Email'] = $infosAdicionaisPedido->customer_email;
-			$dadosPedido [$i] ['CPFouCNPJ'] = $infosAdicionaisPedido->$cpfFormatado;
-			$dadosPedido [$i] ['ValorPedido'] = $infosAdicionaisPedido->price; // Formatar depois
-			$dadosPedido [$i] ['ValorFrete'] = $infosAdicionaisPedido->shipping_amount;
-			$dadosPedido [$i] ['ValorEncargos'] = $infosAdicionaisPedido->customer_email;
-			$dadosPedido [$i] ['ValorDesconto'] = $infosAdicionaisPedido->discount_amount;
-			$dadosPedido [$i] ['ValorEmbalagemPresente'] = '';
-			$dadosPedido [$i] ['ValorReceberEntrega'] = '';
-			$dadosPedido [$i] ['ValorTrocoEntrega'] = '';
-			$dadosPedido [$i] ['DataVenda'] = $infosAdicionaisPedido->created_at;
+			$dadosPedido [$i] ['EMail'] = $infosAdicionaisPedido->customer_email;
+			$dadosPedido [$i] ['CPFouCNPJ'] = $cpfFormatado;
+			$dadosPedido [$i] ['CodigoCliente'] = $cpfFormatado;
+			$dadosPedido [$i] ['CondicaoPagamento'] = 'COMPRAS'; //Validar			
+			$dadosPedido [$i] ['ValorPedido'] = number_format($d->subtotal, 2, '.', ',');
+			$dadosPedido [$i] ['ValorFrete'] = number_format($d->shipping_amount, 2, '.', ',');
+			$dadosPedido [$i] ['ValorDesconto'] = number_format($d->discount_amount, 2, '.', ',');
+			$dadosPedido [$i] ['ValorEncargos'] = '0.00';
+			$dadosPedido [$i] ['ValorEmbalagemPresente'] = '0.00';
+			$dadosPedido [$i] ['ValorReceberEntrega'] = '0.00';
+			$dadosPedido [$i] ['ValorTrocoEntrega'] = '0.00';
+			
+			//Tratamento específico pra data
+			list($data, $hora) = explode(' ', $infosAdicionaisPedido->created_at);		
+			list($ano, $mes, $dia) = explode('-', $data);
+			$dataFormatada = $dia.$mes.$ano.' '.$hora;
+			
+			$dadosPedido [$i] ['DataVenda'] = $dataFormatada;
 			$dadosPedido [$i] ['Transportadora'] = $infosAdicionaisPedido->axado_tnt;
 			$dadosPedido [$i] ['EmitirNotaSimbolica'] = 0; //Boolean
 			$dadosPedido [$i] ['Lote'] = 1; // Cadastrar um Padrão KPL
@@ -307,7 +314,7 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			) = explode("\n", $infosAdicionaisPedido->shipping_address->street);
 			
 			
-			$dadosPedido [$i] ['DestMunicipio'] = $infosAdicionaisPedido->billing_address->city;
+			/*$dadosPedido [$i] ['DestMunicipio'] = $infosAdicionaisPedido->billing_address->city;
 			$dadosPedido [$i] ['DestEstado'] = $infosAdicionaisPedido->shipping_address->region;
 			$dadosPedido [$i] ['DestCep'] = $cepEntregaFormatado;
 			$dadosPedido [$i] ['DestTipoLocalEntrega'] = 'tleeDesconhecido';
@@ -357,7 +364,7 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitarioBruto'] = $item->price;
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['Brinde'] = '';
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['ValorReferencia'] = '';
-			}
+			}*/
 			
 			try {
 				

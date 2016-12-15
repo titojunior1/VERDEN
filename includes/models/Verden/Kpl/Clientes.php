@@ -61,7 +61,7 @@ class Model_Verden_Kpl_Clientes extends Model_Verden_Kpl_KplWebService {
 	
 		$retorno = $this->_kpl->cadastraPedidoKpl($this->_chaveIdentificacao, $dadosPedido);
 	
-		if ( $retorno ['CadastrarClienteResult'] ['Rows'] ['DadosClientesResultado'] ['Resultado'] ['Codigo'] == '200001' ){
+		if ( $retorno ['InserirPedidoResult'] ['Rows'] ['DadosPedidosResultado'] ['Resultado'] ['Codigo'] == '200001' ){
 			return true;
 		}else{
 			throw new RuntimeException('Erro ao cadastrar cliente ' . $retorno ['CadastrarClienteResult'] ['Rows'] ['DadosClientesResultado'] );
