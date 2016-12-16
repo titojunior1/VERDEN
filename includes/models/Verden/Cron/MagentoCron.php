@@ -191,8 +191,5 @@ class Model_Verden_Cron_MagentoCron {
 	
 	echo "- Finalizando cron para cadastrar pedidos de saída da Kpl do cliente Verden " . PHP_EOL;
 		
-	}
-	
-	
-	
+	}	
 }
