@@ -167,8 +167,7 @@ class Model_Verden_Magento_MagentoWebService {
 	
 		try {
 	
-			$result = $this->_webservice->salesOrderList($this->_session, $complexFilter);
-			return $result;
+			return $result = $this->_webservice->salesOrderList($this->_session, $complexFilter);
 	
 		} catch ( Exception $e ) {
 			throw new RuntimeException( 'Erro ao consultar pedidos disponiveis' . ' - ' . $e->getMessage() );
@@ -268,6 +267,22 @@ class Model_Verden_Magento_MagentoWebService {
 			return false;
 		}
 		
+	}
+	
+	public function atualizaStatusPedidoemSeparacao( $idPedido ){
+	
+		if($this->_session_valid == false){
+			$this->_iniciaSessao();
+		}
+	
+		try {
+	
+			return $result = $this->_webservice->salesOrderHold( $this->_session, $idPedido );
+			
+		} catch (SoapFault $e) {
+			return false;
+		}
+	
 	}
 	
 }	

@@ -175,25 +175,42 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 	 * @param array $request
 	 */
 	function ProcessaPedidosWebservice ( $request ) {
+				
+		echo "Conectando ao WebService Kpl... " . PHP_EOL;
+		$this->_kpl = new Model_Verden_Kpl_Clientes();
+		echo "Conectado!" . PHP_EOL;
+		echo PHP_EOL;
 		
-
+		$qtdPedidos = count($request);
+		echo "Pedidos encontrados para integracao: " . $qtdPedidos . PHP_EOL;
+		
 		// erros
 		$erro = null;
 		
 		// coleção de erros, no formato $array_erros[$registro][] = erro
 		$array_erros = array ();
 		$array_erro_principal = array ();
-		$array_precos = array ();
+		$array_precos = array ();	
 		
 		foreach ( $request as $i => $d ) {
 		
 			$dadosCliente = array();
 			$dadosPedido = array();
 			
+			echo PHP_EOL;
+			
 			// formatar CPF
 			$cpfFormatado = $this->Numeros($d->customer_taxvat);
+			echo "Tratando dados para cadastro de cliente codigo: " . $cpfFormatado . PHP_EOL;
+			
 			// formata sexo
-			$sexoCliente = ($d->customer_gender == '1')? 'tseMasculino':'tseFeminino';
+			if ( $d->customer_gender == '1' ){
+				$sexoCliente = 'tseMasculino';
+				$sexoClientePedido = 'M';
+			}else{
+				$sexoCliente = 'tseFeminino';
+				$sexoClientePedido = 'F';
+			}
 			
 			//Manipulando dados para cadastro/atualização de cliente 
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['Email'] = $d->email;
@@ -263,27 +280,26 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['EndEntrega'] ['Pais'] = $infosAdicionaisPedido->shipping_address->country_id;						
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['ClienteEstrangeiro'] = '';
 			$dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['RegimeTributario'] = '';
-
-			echo "Conectando ao WebService Kpl... " . PHP_EOL;
-			$this->_kpl = new Model_Verden_Kpl_Clientes();
-			echo "Conectado!" . PHP_EOL;
-			echo PHP_EOL;
 			
 			try {
-				echo "Efetuando cadastro/atualizacao de cliente " . $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['CPFouCNPJ'] . PHP_EOL;
+				
+				echo "Efetuando cadastro/atualizacao de cliente " . $cpfFormatado . PHP_EOL;
 				$this->_kpl->adicionaCliente( $dadosCliente [$i] ['Cliente'] );
 				echo "Cliente adicionado com sucesso " . PHP_EOL;
+				
 			} catch (Exception $e) {
-				echo "Erro ao cadastrar cliente " . $dadosCliente [$i] ['Cliente'] ['DadosClientes'] ['CPFouCNPJ'] . PHP_EOL;
-				throw new RuntimeException('Erro: ' . $e->getMessage());
+				echo "Erro ao cadastrar cliente " . $cpfFormatado . ' - ' . $e->getMessage() . PHP_EOL;
+				continue;
 			}
+			
+			echo "Tratando dados para cadastro de pedido: " . $infosAdicionaisPedido->increment_id . PHP_EOL;
 			
 			//Seguindo com criação de Pedidos
 			$dadosPedido [$i] ['NumeroDoPedido'] = $infosAdicionaisPedido->increment_id;
 			$dadosPedido [$i] ['EMail'] = $infosAdicionaisPedido->customer_email;
 			$dadosPedido [$i] ['CPFouCNPJ'] = $cpfFormatado;
 			$dadosPedido [$i] ['CodigoCliente'] = $cpfFormatado;
-			$dadosPedido [$i] ['CondicaoPagamento'] = 'COMPRAS'; //Validar			
+			//$dadosPedido [$i] ['CondicaoPagamento'] = 'COMPRAS'; //Validar			
 			$dadosPedido [$i] ['ValorPedido'] = number_format($d->subtotal, 2, '.', ',');
 			$dadosPedido [$i] ['ValorFrete'] = number_format($d->shipping_amount, 2, '.', ',');
 			$dadosPedido [$i] ['ValorDesconto'] = number_format($d->discount_amount, 2, '.', ',');
@@ -302,7 +318,7 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			$dadosPedido [$i] ['EmitirNotaSimbolica'] = 0; //Boolean
 			$dadosPedido [$i] ['Lote'] = 1; // Cadastrar um Padrão KPL
 			$dadosPedido [$i] ['DestNome'] = $infosAdicionaisPedido->shipping_address->firstname . ' ' . $infosAdicionaisPedido->shipping_address->lastname ;
-			$dadosPedido [$i] ['DestSexo'] = $sexoCliente;
+			$dadosPedido [$i] ['DestSexo'] = $sexoClientePedido;
 			$dadosPedido [$i] ['DestEmail'] = $infosAdicionaisPedido->customer_email;
 			$dadosPedido [$i] ['DestTelefone'] = $infosAdicionaisPedido->shipping_address->telephone;
 			
@@ -314,81 +330,76 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			) = explode("\n", $infosAdicionaisPedido->shipping_address->street);
 			
 			
-			/*$dadosPedido [$i] ['DestMunicipio'] = $infosAdicionaisPedido->billing_address->city;
+			$dadosPedido [$i] ['DestMunicipio'] = $infosAdicionaisPedido->billing_address->city;
 			$dadosPedido [$i] ['DestEstado'] = $infosAdicionaisPedido->shipping_address->region;
 			$dadosPedido [$i] ['DestCep'] = $cepEntregaFormatado;
 			$dadosPedido [$i] ['DestTipoLocalEntrega'] = 'tleeDesconhecido';
-			$dadosPedido [$i] ['DestEstrangeiro'] = '';
 			$dadosPedido [$i] ['DestPais'] = $infosAdicionaisPedido->shipping_address->country_id;
 			$dadosPedido [$i] ['DestCPF'] = $cpfFormatado;
 			$dadosPedido [$i] ['DestTipoPessoa'] = $tipoPessoa;
 			$dadosPedido [$i] ['DestDocumento'] = $cpfFormatado;
-			$dadosPedido [$i] ['DestInscricaoEstadual'] = '';
-			$dadosPedido [$i] ['DestReferencia'] = "";
 			$dadosPedido [$i] ['PedidoJaPago'] = 1; //Boolean
-			$dadosPedido [$i] ['DataDoPagamento'] = '';
-			$dadosPedido [$i] ['OptouNFPaulista'] = ''; //Necessário verificar essa opção
-			//$dadosPedido [$i] ['CartaoPresenteBrinde'] = 1;
+// 			$dadosPedido [$i] ['DestEstrangeiro'] = '';
+// 			$dadosPedido [$i] ['DestInscricaoEstadual'] = '';
+// 			$dadosPedido [$i] ['DestReferencia'] = "";			
+// 			$dadosPedido [$i] ['DataDoPagamento'] = '';
+// 			$dadosPedido [$i] ['OptouNFPaulista'] = ''; //Necessário verificar essa opção
+// 			//$dadosPedido [$i] ['CartaoPresenteBrinde'] = 1;
 			
 			// Formas de pagamento devem ser tratadas caso a caso
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['FormaPagamentoCodigo'] = $infosAdicionaisPedido->payment->method;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['Valor'] = $infosAdicionaisPedido->payment->amount_ordered;
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['FormaPagamentoCodigo'] = 'COMPRAS'; //$infosAdicionaisPedido->payment->method;
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['Valor'] = number_format($infosAdicionaisPedido->payment->amount_ordered, 2, '.', ',');
 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNumero'] = $infosAdicionaisPedido->payment->cc_number_enc;
 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoSeguranca'] = $infosAdicionaisPedido->payment->cc_last4;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoValidade'] = $infosAdicionaisPedido->payment->cc_exp_month. '/' .$infosAdicionaisPedido->payment->cc_exp_year;
+			//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoValidade'] = $infosAdicionaisPedido->payment->cc_exp_month.$infosAdicionaisPedido->payment->cc_exp_year;
 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNomeImpresso'] = $infosAdicionaisPedido->payment->cc_owner;
 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoQtdeParcelas'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoAutorizacao'] = ''; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoVencimento'] = ''; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoNumeroBancario'] = ''; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCPFouCNPJTitular'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoDataNascimentoTitular'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaNumeroBanco'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaCodigoAgencia'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVCodigoAgencia'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaContaCorrente'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVContaCorrente'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['PreAutorizadaNaPlataforma'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVContaCorrente'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoTID'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNSU'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNumeroToken'] = 1; // Necessário integrar API pagar.me
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CodigoTransacaoGateway'] = 1; // Necessário integrar API pagar.me
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoAutorizacao'] = '123'; // Necessário integrar API pagar.me
+			//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoVencimento'] = ''; // Necessário integrar API pagar.me
+			//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoNumeroBancario'] = ''; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCPFouCNPJTitular'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoDataNascimentoTitular'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaNumeroBanco'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaCodigoAgencia'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVCodigoAgencia'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaContaCorrente'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVContaCorrente'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['PreAutorizadaNaPlataforma'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaDVContaCorrente'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoTID'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNSU'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNumeroToken'] = 1; // Necessário integrar API pagar.me
+// 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CodigoTransacaoGateway'] = 1; // Necessário integrar API pagar.me
+			
 			// Itens
 			foreach ($infosAdicionaisPedido->items as $it => $item){
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['CodigoProduto'] = $item->sku;
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['QuantidadeProduto'] = (int) $item->qty_ordered;
-				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitario'] = $item->original_price;
-				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['EmbalagemPresente'] = '';
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitario'] = number_format($item->original_price, 2, '.', ',');
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['MensagemPresente'] = $item->gift_message_available;
-				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitarioBruto'] = $item->price;
-				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['Brinde'] = '';
-				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['ValorReferencia'] = '';
-			}*/
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitarioBruto'] = number_format($item->price, 2, '.', ',');
+// 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['Brinde'] = '';
+// 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['ValorReferencia'] = '';
+// 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['EmbalagemPresente'] = '';
+			}
 			
 			try {
 				
-				echo "Criando pedido " . $dadosPedido [$i] ['NumeroDoPedido'] . PHP_EOL;
+				echo "Importando pedido " . $dadosPedido [$i] ['NumeroDoPedido'] . PHP_EOL;
 				$this->_kpl->cadastraPedido( $dadosPedido );
-				echo "Pedido importado" . PHP_EOL;
+				echo "Pedido importado com sucesso" . PHP_EOL;
 				
-				$order = Mage::getModel('sales/order')->loadByIncrementId($dadosPedido [$i] ['NumeroDoPedido']);
-				$state = 'processing';
-				$status = 'Em Separação'; //status criado por nós anteriormente.
-				$comment = '';
-				$order->setState($state, $status, $comment, false);
-				$order->save();
-				
-				
+				echo "Atualizando status de pedido {$dadosPedido [$i] ['NumeroDoPedido']} no ambiente Magento" . PHP_EOL;
+				$this->_magento->atualizaStatusPedidoemSeparacao( $dadosPedido [$i] ['NumeroDoPedido'] );			
+				echo "Status atualizado com sucesso" . PHP_EOL;
 				
 			} catch (Exception $e) {
-				echo "Erro ao importar pedido " . $dadosPedido [$i] ['NumeroDoPedido'] . PHP_EOL;
-				throw new RuntimeException('Erro: ' . $e->getMessage());
+				echo "Erro ao importar pedido " . $dadosPedido [$i] ['NumeroDoPedido'] . ' - ' . $e->getMessage() . PHP_EOL;
+				continue;
 			}
 			
 		}
 		
-		var_dump($arrayClientes);
 	}
 	
 }
