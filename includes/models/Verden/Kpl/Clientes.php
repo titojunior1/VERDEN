@@ -45,7 +45,7 @@ class Model_Verden_Kpl_Clientes extends Model_Verden_Kpl_KplWebService {
 		if ( $retorno ['CadastrarClienteResult'] ['Rows'] ['DadosClientesResultado'] ['Resultado'] ['Codigo'] == '200002' ){
 			return true;
 		}else{
-			throw new RuntimeException('Erro ao cadastrar cliente ' . $retorno ['CadastrarClienteResult'] ['Rows'] ['DadosClientesResultado'] ['Resultado'] ['Descricao']);
+			throw new RuntimeException( $retorno ['CadastrarClienteResult'] ['Rows'] ['DadosClientesResultado'] ['Resultado'] ['Descricao'] );
 		}		
 
 	}
@@ -64,7 +64,7 @@ class Model_Verden_Kpl_Clientes extends Model_Verden_Kpl_KplWebService {
 		if ( $retorno ['InserirPedidoResult'] ['Rows'] ['DadosPedidosResultado'] ['Resultado'] ['Codigo'] == '200002' ){
 			return true;
 		}else{
-			throw new RuntimeException('Erro ao cadastrar cliente ' . $retorno ['CadastrarClienteResult'] ['Rows'] ['DadosClientesResultado'] );
+			throw new RuntimeException( $retorno ['InserirPedidoResult'] ['Rows'] ['DadosPedidosResultado'] ['Resultado'] ['Descricao'] );
 		}
 	
 	}

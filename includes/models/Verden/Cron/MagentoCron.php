@@ -5,7 +5,6 @@
  * @author Tito Junior <titojunior1@gmail.com>
  * 
  */
-require_once 'includes/verden.php';
 class Model_Verden_Cron_MagentoCron {
 	
 	/**
@@ -150,10 +149,11 @@ class Model_Verden_Cron_MagentoCron {
 						),
 						array(
 								'key' => 'status',
-								'value' => 'processing'
+								'value' => array('key' => 'eq', 'value' => 'processing')
 						)	
 				)
 		);
+			
 		//Filtro para busca específica de pedido
 		/*$complexFilter = array(
 				'complex_filter' => array(
@@ -196,5 +196,3 @@ class Model_Verden_Cron_MagentoCron {
 	
 	
 }
-$obj = new Model_Verden_Cron_MagentoCron();
-$obj->CadastraPedidosSaidaMagento();

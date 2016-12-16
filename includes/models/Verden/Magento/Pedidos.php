@@ -300,9 +300,9 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			$dadosPedido [$i] ['CPFouCNPJ'] = $cpfFormatado;
 			$dadosPedido [$i] ['CodigoCliente'] = $cpfFormatado;
 			//$dadosPedido [$i] ['CondicaoPagamento'] = 'COMPRAS'; //Validar			
-			$dadosPedido [$i] ['ValorPedido'] = number_format($d->subtotal, 2, '.', ',');
-			$dadosPedido [$i] ['ValorFrete'] = number_format($d->shipping_amount, 2, '.', ',');
-			$dadosPedido [$i] ['ValorDesconto'] = number_format($d->discount_amount, 2, '.', ',');
+			$dadosPedido [$i] ['ValorPedido'] = number_format($d->subtotal, 2, '.', '');
+			$dadosPedido [$i] ['ValorFrete'] = number_format($d->shipping_amount, 2, '.', '');
+			$dadosPedido [$i] ['ValorDesconto'] = number_format($d->discount_amount, 2, '.', '');
 			$dadosPedido [$i] ['ValorEncargos'] = '0.00';
 			$dadosPedido [$i] ['ValorEmbalagemPresente'] = '0.00';
 			$dadosPedido [$i] ['ValorReceberEntrega'] = '0.00';
@@ -348,13 +348,13 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			
 			// Formas de pagamento devem ser tratadas caso a caso
 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['FormaPagamentoCodigo'] = 'COMPRAS'; //$infosAdicionaisPedido->payment->method;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['Valor'] = number_format($infosAdicionaisPedido->payment->amount_ordered, 2, '.', ',');
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['Valor'] = number_format($infosAdicionaisPedido->payment->amount_ordered, 2, '.', '');
 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNumero'] = $infosAdicionaisPedido->payment->cc_number_enc;
-			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoSeguranca'] = $infosAdicionaisPedido->payment->cc_last4;
-			//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoValidade'] = $infosAdicionaisPedido->payment->cc_exp_month.$infosAdicionaisPedido->payment->cc_exp_year;
+			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoSeguranca'] = $infosAdicionaisPedido->payment->cc_last4;			
 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNomeImpresso'] = $infosAdicionaisPedido->payment->cc_owner;
 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoQtdeParcelas'] = 1; // Necessário integrar API pagar.me
 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoAutorizacao'] = '123'; // Necessário integrar API pagar.me
+			//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoValidade'] = $infosAdicionaisPedido->payment->cc_exp_month.$infosAdicionaisPedido->payment->cc_exp_year;
 			//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoVencimento'] = ''; // Necessário integrar API pagar.me
 			//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoNumeroBancario'] = ''; // Necessário integrar API pagar.me
 // 			$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCPFouCNPJTitular'] = 1; // Necessário integrar API pagar.me
@@ -375,9 +375,9 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			foreach ($infosAdicionaisPedido->items as $it => $item){
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['CodigoProduto'] = $item->sku;
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['QuantidadeProduto'] = (int) $item->qty_ordered;
-				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitario'] = number_format($item->original_price, 2, '.', ',');
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitario'] = number_format($item->original_price, 2, '.', '');
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['MensagemPresente'] = $item->gift_message_available;
-				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitarioBruto'] = number_format($item->price, 2, '.', ',');
+				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitarioBruto'] = number_format($item->price, 2, '.', '');
 // 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['Brinde'] = '';
 // 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['ValorReferencia'] = '';
 // 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['EmbalagemPresente'] = '';
