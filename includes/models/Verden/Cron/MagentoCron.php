@@ -138,7 +138,7 @@ class Model_Verden_Cron_MagentoCron {
 			$this->_magento = new Model_Verden_Magento_MagentoWebService();
 		}
 				
-		$timestamp = '2016-08-19 19:20:00';
+		$timestamp = '2016-07-01 19:20:00';
 				
 		//Filtro para consulta de pedidos baseando-se por Status e Data a partir de novembro/2016	
 		$complexFilter = array(
