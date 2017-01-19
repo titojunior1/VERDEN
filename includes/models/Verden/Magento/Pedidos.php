@@ -303,7 +303,7 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 			//$dadosPedido [$i] ['CondicaoPagamento'] = 'COMPRAS'; //Validar			
 			$dadosPedido [$i] ['ValorPedido'] = number_format($d->subtotal, 2, '.', '');
 			$dadosPedido [$i] ['ValorFrete'] = number_format($d->shipping_amount, 2, '.', '');
-			$dadosPedido [$i] ['ValorDesconto'] = number_format($d->discount_amount, 2, '.', '');
+			$dadosPedido [$i] ['ValorDesconto'] = str_replace('-', '', number_format($d->discount_amount, 2, '.', ''));
 			$dadosPedido [$i] ['ValorEncargos'] = '0.00';
 			$dadosPedido [$i] ['ValorEmbalagemPresente'] = '0.00';
 			$dadosPedido [$i] ['ValorReceberEntrega'] = '0.00';
@@ -352,8 +352,9 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 				
 				case 'skyhub_payment' :
 					
-					$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['FormaPagamentoCodigo'] = 'SKYHUB';
+					$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['FormaPagamentoCodigo'] = 'skyhub_skyhub';
 					$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['Valor'] = number_format($infosAdicionaisPedido->payment->amount_ordered, 2, '.', '');					
+					$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoQtdeParcelas'] = '1';
 					//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoVencimento'] = ''; // Necessário integrar API pagar.me
 					//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['BoletoNumeroBancario'] = ''; // Necessário integrar API pagar.me					
 					//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['DebitoEmContaNumeroBanco'] = 1; // Necessário integrar API pagar.me
@@ -381,7 +382,8 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 							$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNumero'] = $infosAdicionaisPedido->payment->cc_number_enc;
 							$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoSeguranca'] = $infosAdicionaisPedido->payment->cc_last4;
 							$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoNomeImpresso'] = $infosAdicionaisPedido->payment->cc_owner;
-							$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoQtdeParcelas'] = $infosAdicionaisPedido->payment->installments;
+							//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoQtdeParcelas'] = $infosAdicionaisPedido->payment->installments;
+							$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoQtdeParcelas'] = '1';
 							$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoCodigoAutorizacao'] = $infosAdicionaisPedido->payment->cc_last4;
 							//$dadosPedido [$i] ['FormasDePagamento'] ['DadosPedidosFormaPgto'] ['CartaoValidade'] = $infosAdicionaisPedido->payment->cc_exp_month.$infosAdicionaisPedido->payment->cc_exp_year;
 								
