@@ -44,6 +44,8 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 		$produto =  array(
 							'price' => $dados_precos ['PrecoTabela'],
 							'special_price' => $dados_precos ['PrecoPromocional'],
+							'special_from_date' => $dados_precos ['DataInicioPromocao'],
+							'special_to_date' => $dados_precos ['DataTerminoPromocao'],
 						); 
 
 		$this->_magento->atualizaProduto($idProduto, $produto);
@@ -92,8 +94,18 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 			$array_precos [0] ['NomeLista'] = $request ['DadosPreco'] ['NomeLista'];
 			$array_precos [0] ['PrecoTabela'] = $request ['DadosPreco'] ['PrecoTabela'];
 			$array_precos [0] ['PrecoPromocional'] = $request ['DadosPreco'] ['PrecoPromocional'];
-			$array_precos [0] ['DataInicioPromocao'] = $request ['DadosPreco'] ['DataInicioPromocao'];
-			$array_precos [0] ['DataTerminoPromocao'] = $request ['DadosPreco'] ['DataTerminoPromocao'];
+			list($dataInicioPromo, $horaInicioPromo) = explode(' ', $request ['DadosPreco'] ['DataInicioPromocao']);
+			$dia=substr($dataInicioPromo,0,2); 
+			$mes=substr($dataInicioPromo,2,2);
+			$ano=substr($dataInicioPromo,4,4);
+			$dataInicioPromo = $dia.'/'.$mes.'/'.$ano;
+			$array_precos [0] ['DataInicioPromocao'] = $dataInicioPromo;
+			list($dataFimPromo, $horaFimPromo) = explode(' ', $request ['DadosPreco'] ['DataTerminoPromocao'] );
+			$dia=substr($dataFimPromo,0,2);
+			$mes=substr($dataFimPromo,2,2);
+			$ano=substr($dataFimPromo,4,4);
+			$dataFimPromo = $dia.'/'.$mes.'/'.$ano;
+			$array_precos [0] ['DataTerminoPromocao'] = $dataFimPromo;
 			$array_precos [0] ['DescontoMaximoProduto'] = $request ['DadosPreco'] ['DescontoMaximoProduto'];
 			$array_precos [0] ['CodigoProdutoParceiro'] = $request ['DadosPreco'] ['CodigoProdutoParceiro'];
 			
@@ -108,8 +120,10 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 				$array_precos [$i] ['NomeLista'] = $d ['NomeLista'];
 				$array_precos [$i] ['PrecoTabela'] = $d ['PrecoTabela'];
 				$array_precos [$i] ['PrecoPromocional'] = $d ['PrecoPromocional'];
-				$array_precos [$i] ['DataInicioPromocao'] = $d ['DataInicioPromocao'];
-				$array_precos [$i] ['DataTerminoPromocao'] = $d ['DataTerminoPromocao'];
+				list($dataInicioPromo, $horaInicioPromo) = explode(' ', $d ['DataInicioPromocao']);
+				$array_precos [$i] ['DataInicioPromocao'] = $dataInicioPromo;
+				list($dataFimPromo, $horaFimPromo) = explode(' ', $d ['DataTerminoPromocao']);
+				$array_precos [$i] ['DataTerminoPromocao'] = $dataFimPromo;
 				$array_precos [$i] ['DescontoMaximoProduto'] = $d ['DescontoMaximoProduto'];
 				$array_precos [$i] ['CodigoProdutoParceiro'] = $d ['CodigoProdutoParceiro'];
 			}

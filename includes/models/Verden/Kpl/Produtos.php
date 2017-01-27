@@ -140,9 +140,9 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 			$array_produtos [0] ['SKU'] = $request ['DadosProdutos'] ['CodigoProduto'];
 			$array_produtos [0] ['EanProprio'] = $request ['DadosProdutos'] ['CodigoBarras'];
 			$array_produtos [0] ['EstoqueMinimo'] = $request ['DadosProdutos'] ['QtdeMinimaEstoque'];
-			$array_produtos [0] ['ValorVenda'] = '0.00';
+			//$array_produtos [0] ['ValorVenda'] = '0.00';
 			$array_produtos [0] ['Descricao'] =  utf8_encode(empty($request ['DadosProdutos'] ['Descricao'])? $request ['DadosProdutos'] ['NomeProduto'] : str_replace('<BR>','',$request ['DadosProdutos'] ['Descricao'])) ;
-			$array_produtos [0] ['ValorCusto'] = isset($request ['DadosProdutos'] ['ValorCusto']) ? $request ['DadosProdutos'] ['ValorCusto']: '0.00';
+			$array_produtos [0] ['ValorCusto'] = isset($request ['DadosProdutos'] ['ValorCusto']) ? $request ['DadosProdutos'] ['ValorCusto']: '';
 			$array_produtos [0] ['CodigoProdutoPai'] = isset($request ['DadosProdutos'] ['CodigoProdutoPai']) ? $request ['DadosProdutos'] ['CodigoProdutoPai']: '';
 			$array_produtos [0] ['Unidade'] = isset($request ['DadosProdutos'] ['Unidade']) ? $request ['DadosProdutos'] ['Unidade']: '';
 		
@@ -163,9 +163,9 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 				$array_produtos [$i] ['SKU'] = $d ['CodigoProduto'];
 				$array_produtos [$i] ['EanProprio'] = $d ['CodigoBarras'];
 				$array_produtos [$i] ['EstoqueMinimo'] = $d ['QtdeMinimaEstoque'];
-				$array_produtos [$i] ['ValorVenda'] = '0.00';				
+				//$array_produtos [$i] ['ValorVenda'] = '0.00';				
 				$array_produtos [$i] ['Descricao'] =  utf8_encode(empty($d ['Descricao'])? $d ['NomeProduto'] : str_replace('<BR>','',$d  ['Descricao'])) ;
-				$array_produtos [$i] ['ValorCusto'] = isset($d ['ValorCusto']) ? $d ['ValorCusto']: '0.00';				
+				$array_produtos [$i] ['ValorCusto'] = isset($d ['ValorCusto']) ? $d ['ValorCusto']: '';				
 				$array_produtos [$i] ['CodigoProdutoPai'] = isset($d ['CodigoProdutoPai']) ? $d ['CodigoProdutoPai']: '';
 				$array_produtos [$i] ['Unidade'] = isset($d ['Unidade']) ? $d ['Unidade']: '';
 			}
