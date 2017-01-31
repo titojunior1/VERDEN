@@ -444,6 +444,10 @@ class Model_Verden_Magento_Pedidos extends Model_Verden_Magento_MagentoWebServic
 		
 			// Itens
 			foreach ($infosAdicionaisPedido->items as $it => $item){
+				//Verificar se o item atual é o mesmo sku do item anterior
+				if ($item->sku == $dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it -1] ['CodigoProduto']){
+					continue;
+				}
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['CodigoProduto'] = $item->sku;
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['QuantidadeProduto'] = (int) $item->qty_ordered;
 				$dadosPedido [$i] ['Itens'] ['DadosPedidosItem'] [$it] ['PrecoUnitario'] = number_format($item->original_price, 2, '.', '');
