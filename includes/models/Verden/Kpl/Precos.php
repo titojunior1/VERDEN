@@ -159,6 +159,8 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 					$produto = $this->_magento->buscaProduto($dados_precos['CodigoProduto']);
 					if ( !empty ( $produto ) ) {
 						echo "Atualizando Preco " . $dados_precos['CodigoProduto'] . PHP_EOL;
+						echo "Preco Tabela: R$" . $dados_precos['PrecoTabela'] . PHP_EOL;
+						echo "Preco Promocional: R$" . $dados_precos['PrecoPromocional'] . PHP_EOL;
 						$dados_precos['product_id'] = $produto; // ID do Produto na Loja Magento
 						$this->_atualizaPreco( $dados_precos );
 						echo "Preco atualizado. " . PHP_EOL;

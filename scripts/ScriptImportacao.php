@@ -8,4 +8,4 @@ $result = base64_decode('dmQxMjA5ODY=');
 // $obj->CadastraPedidosSaidaMagento();
 
 $obj = new Model_Verden_Cron_KplCron();
-$obj->CadastraPrecosKpl();
+$obj->CadastraProdutosKpl();

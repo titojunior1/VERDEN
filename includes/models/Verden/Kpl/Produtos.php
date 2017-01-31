@@ -48,7 +48,7 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 							'weight' => $dados_produtos ['Peso'],
 							'status' => '1',
 							'url_key' => $dados_produtos ['Nome'],
-							'visibility' => '4',
+							'visibility' => $dados_produtos ['Visibilidade'],
 							'price' => $dados_produtos ['ValorVenda'],
 							'special_price' => $dados_produtos ['ValorCusto'],
 							'tax_class_id' => 1,
@@ -75,7 +75,7 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 							'weight' => $dados_produtos ['Peso'],
 							'status' => '1',
 							'url_key' => $dados_produtos ['Nome'],
-							'visibility' => '4',
+							'visibility' => $dados_produtos ['Visibilidade'],
 							'price' => $dados_produtos ['ValorVenda'],
 							'special_price' => $dados_produtos ['ValorCusto'],
 							'tax_class_id' => 1,
@@ -142,9 +142,16 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 			$array_produtos [0] ['EstoqueMinimo'] = $request ['DadosProdutos'] ['QtdeMinimaEstoque'];
 			//$array_produtos [0] ['ValorVenda'] = '0.00';
 			$array_produtos [0] ['Descricao'] =  utf8_encode(empty($request ['DadosProdutos'] ['Descricao'])? $request ['DadosProdutos'] ['NomeProduto'] : str_replace('<BR>','',$request ['DadosProdutos'] ['Descricao'])) ;
-			$array_produtos [0] ['ValorCusto'] = isset($request ['DadosProdutos'] ['ValorCusto']) ? $request ['DadosProdutos'] ['ValorCusto']: '';
+			//$array_produtos [0] ['ValorCusto'] = isset($request ['DadosProdutos'] ['ValorCusto']) ? $request ['DadosProdutos'] ['ValorCusto']: '';
 			$array_produtos [0] ['CodigoProdutoPai'] = isset($request ['DadosProdutos'] ['CodigoProdutoPai']) ? $request ['DadosProdutos'] ['CodigoProdutoPai']: '';
 			$array_produtos [0] ['Unidade'] = isset($request ['DadosProdutos'] ['Unidade']) ? $request ['DadosProdutos'] ['Unidade']: '';
+			
+			// verifica se produto é pai ou filho
+			if ( strstr( $request ['DadosProdutos'] ['CodigoProduto'], '-' ) == true ){
+				$array_produtos [0] ['Visibilidade'] = 1; // Não exibir pois é produto Filho 
+			}else{
+				$array_produtos [0] ['Visibilidade'] = 4; // Exibir produto Pai
+			}
 		
 		} else {
 			
@@ -165,9 +172,16 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 				$array_produtos [$i] ['EstoqueMinimo'] = $d ['QtdeMinimaEstoque'];
 				//$array_produtos [$i] ['ValorVenda'] = '0.00';				
 				$array_produtos [$i] ['Descricao'] =  utf8_encode(empty($d ['Descricao'])? $d ['NomeProduto'] : str_replace('<BR>','',$d  ['Descricao'])) ;
-				$array_produtos [$i] ['ValorCusto'] = isset($d ['ValorCusto']) ? $d ['ValorCusto']: '';				
+				//$array_produtos [$i] ['ValorCusto'] = isset($d ['ValorCusto']) ? $d ['ValorCusto']: '';				
 				$array_produtos [$i] ['CodigoProdutoPai'] = isset($d ['CodigoProdutoPai']) ? $d ['CodigoProdutoPai']: '';
 				$array_produtos [$i] ['Unidade'] = isset($d ['Unidade']) ? $d ['Unidade']: '';
+				
+				// verifica se produto é pai ou filho
+				if ( strstr( $d ['CodigoProduto'], '-' ) == true ){
+					$array_produtos [0] ['Visibilidade'] = 1; // Não exibir pois é produto Filho
+				}else{
+					$array_produtos [0] ['Visibilidade'] = 4; // Exibir produto Pai
+				}
 			}
 		}
 		
