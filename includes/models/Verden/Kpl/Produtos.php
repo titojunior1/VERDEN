@@ -76,8 +76,8 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 							'status' => '1',
 							'url_key' => $dados_produtos ['Nome'],
 							'visibility' => $dados_produtos ['Visibilidade'],
-							'price' => $dados_produtos ['ValorVenda'],
-							'special_price' => $dados_produtos ['ValorCusto'],
+							//'price' => $dados_produtos ['ValorVenda'],
+							//'special_price' => $dados_produtos ['ValorCusto'],
 							'tax_class_id' => 1,
 							'meta_title' => $dados_produtos ['Nome']
 						); 
@@ -178,9 +178,9 @@ class Model_Verden_Kpl_Produtos extends Model_Verden_Kpl_KplWebService {
 				
 				// verifica se produto é pai ou filho
 				if ( strstr( $d ['CodigoProduto'], '-' ) == true ){
-					$array_produtos [0] ['Visibilidade'] = 1; // Não exibir pois é produto Filho
+					$array_produtos [$i] ['Visibilidade'] = 1; // Não exibir pois é produto Filho
 				}else{
-					$array_produtos [0] ['Visibilidade'] = 4; // Exibir produto Pai
+					$array_produtos [$i] ['Visibilidade'] = 4; // Exibir produto Pai
 				}
 			}
 		}
