@@ -93,19 +93,21 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 			$array_precos [0] ['CodigoProdutoAbacos'] = $request ['DadosPreco'] ['CodigoProdutoAbacos'];
 			$array_precos [0] ['NomeLista'] = $request ['DadosPreco'] ['NomeLista'];
 			$array_precos [0] ['PrecoTabela'] = $request ['DadosPreco'] ['PrecoTabela'];
-			$array_precos [0] ['PrecoPromocional'] = $request ['DadosPreco'] ['PrecoPromocional'];
-			list($dataInicioPromo, $horaInicioPromo) = explode(' ', $request ['DadosPreco'] ['DataInicioPromocao']);
-			$dia=substr($dataInicioPromo,0,2); 
-			$mes=substr($dataInicioPromo,2,2);
-			$ano=substr($dataInicioPromo,4,4);
-			$dataInicioPromo = $dia.'/'.$mes.'/'.$ano;
-			$array_precos [0] ['DataInicioPromocao'] = $dataInicioPromo;
-			list($dataFimPromo, $horaFimPromo) = explode(' ', $request ['DadosPreco'] ['DataTerminoPromocao'] );
-			$dia=substr($dataFimPromo,0,2);
-			$mes=substr($dataFimPromo,2,2);
-			$ano=substr($dataFimPromo,4,4);
-			$dataFimPromo = $dia.'/'.$mes.'/'.$ano;
-			$array_precos [0] ['DataTerminoPromocao'] = $dataFimPromo;
+			$array_precos [0] ['PrecoPromocional'] = ( $request ['DadosPreco'] ['PrecoPromocional'] == 0 )? '' : $request ['DadosPreco'] ['PrecoPromocional'];
+			if ( !empty( $request ['DadosPreco'] ['DataInicioPromocao'] ) && !empty( $request ['DadosPreco'] ['DataTerminoPromocao'] ) ){
+				list($dataInicioPromo, $horaInicioPromo) = explode(' ', $request ['DadosPreco'] ['DataInicioPromocao']);
+				$dia=substr($dataInicioPromo,0,2);
+				$mes=substr($dataInicioPromo,2,2);
+				$ano=substr($dataInicioPromo,4,4);
+				$dataInicioPromo = $dia.'/'.$mes.'/'.$ano;
+				$array_precos [0] ['DataInicioPromocao'] = $dataInicioPromo;
+				list($dataFimPromo, $horaFimPromo) = explode(' ', $request ['DadosPreco'] ['DataTerminoPromocao'] );
+				$dia=substr($dataFimPromo,0,2);
+				$mes=substr($dataFimPromo,2,2);
+				$ano=substr($dataFimPromo,4,4);
+				$dataFimPromo = $dia.'/'.$mes.'/'.$ano;
+				$array_precos [0] ['DataTerminoPromocao'] = $dataFimPromo;
+			}			
 			$array_precos [0] ['DescontoMaximoProduto'] = $request ['DadosPreco'] ['DescontoMaximoProduto'];
 			$array_precos [0] ['CodigoProdutoParceiro'] = $request ['DadosPreco'] ['CodigoProdutoParceiro'];
 			
@@ -119,11 +121,21 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 				$array_precos [$i] ['CodigoProdutoAbacos'] = $d ['CodigoProdutoAbacos'];
 				$array_precos [$i] ['NomeLista'] = $d ['NomeLista'];
 				$array_precos [$i] ['PrecoTabela'] = $d ['PrecoTabela'];
-				$array_precos [$i] ['PrecoPromocional'] = $d ['PrecoPromocional'];
-				list($dataInicioPromo, $horaInicioPromo) = explode(' ', $d ['DataInicioPromocao']);
-				$array_precos [$i] ['DataInicioPromocao'] = $dataInicioPromo;
-				list($dataFimPromo, $horaFimPromo) = explode(' ', $d ['DataTerminoPromocao']);
-				$array_precos [$i] ['DataTerminoPromocao'] = $dataFimPromo;
+				$array_precos [$i] ['PrecoPromocional'] = ( $d ['PrecoPromocional'] == 0 )? '' : $d ['PrecoPromocional'];
+				if ( !empty( $d ['DataInicioPromocao'] ) && !empty( $d ['DataTerminoPromocao'] ) ){
+					list($dataInicioPromo, $horaInicioPromo) = explode(' ', $d ['DataInicioPromocao']);
+					$dia=substr($dataInicioPromo,0,2);
+					$mes=substr($dataInicioPromo,2,2);
+					$ano=substr($dataInicioPromo,4,4);
+					$dataInicioPromo = $dia.'/'.$mes.'/'.$ano;
+					$array_precos [$i] ['DataInicioPromocao'] = $dataInicioPromo;
+					list($dataFimPromo, $horaFimPromo) = explode(' ', $d ['DataTerminoPromocao']);
+					$dia=substr($dataFimPromo,0,2);
+					$mes=substr($dataFimPromo,2,2);
+					$ano=substr($dataFimPromo,4,4);
+					$dataFimPromo = $dia.'/'.$mes.'/'.$ano;
+					$array_precos [$i] ['DataTerminoPromocao'] = $dataFimPromo;
+				}				
 				$array_precos [$i] ['DescontoMaximoProduto'] = $d ['DescontoMaximoProduto'];
 				$array_precos [$i] ['CodigoProdutoParceiro'] = $d ['CodigoProdutoParceiro'];
 			}
@@ -161,6 +173,8 @@ class Model_Verden_Kpl_Precos extends Model_Verden_Kpl_KplWebService {
 						echo "Atualizando Preco " . $dados_precos['CodigoProduto'] . PHP_EOL;
 						echo "Preco Tabela: R$" . $dados_precos['PrecoTabela'] . PHP_EOL;
 						echo "Preco Promocional: R$" . $dados_precos['PrecoPromocional'] . PHP_EOL;
+						echo "Data Inicio: " . $dados_precos['DataInicioPromocao'] . PHP_EOL;
+						echo "Data Fim: " . $dados_precos['DataTerminoPromocao'] . PHP_EOL;
 						$dados_precos['product_id'] = $produto; // ID do Produto na Loja Magento
 						$this->_atualizaPreco( $dados_precos );
 						echo "Preco atualizado. " . PHP_EOL;
