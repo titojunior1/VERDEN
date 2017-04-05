@@ -414,6 +414,34 @@ class Model_Verden_Kpl_KplWebService {
 	}
 	
 	/**
+	 *
+	 * Método para confirmação de atualização de status junto à KPL.
+	 * @param string $protocoloStatus
+	 * @throws InvalidArgumentException
+	 * @throws Exception
+	 */
+	public function confirmarRecebimentoStatusPedido($protocoloStatus) {
+		if (empty ( $protocoloStatus )) {
+			throw new InvalidArgumentException ( 'Protocolo do Status não informado' );
+		}
+	
+		try {
+			$resultado = $this->_webservice->call ( 'ConfirmarRecebimentoStatusPedido', array ('ProtocoloStatusPedido' => $protocoloStatus ) );
+			if ($resultado ['ConfirmarRecebimentoStatusPedidoResult'] ['Codigo'] == '200001') {
+				return true;
+			} else {
+				//gravar mensagem de erro.
+				throw new Exception ( "Erro ao confirmar o envio do protocolo do status" . PHP_EOL );
+					
+			}
+		} catch ( Exception $e ) {
+			throw new Exception ( $e->getMessage () );
+	
+		}
+	
+	}
+	
+	/**
 	 * Retorna os fornecedores disponíveis para integração.
 	 * @param string $chaveIdentificacao
 	 */
@@ -453,7 +481,8 @@ class Model_Verden_Kpl_KplWebService {
 	
 	/**
 	 * Retorna todos os produtos atualizados ou inseridos a partir de uma determinada data
-	 * @param date dateUpdated Data para pesquisa
+	 * @param string $chaveIdentificacao
+	 * @throws RuntimeException
 	 */
 	public function ProdutosDisponiveis($chaveIdentificacao) {
 		try {
@@ -466,7 +495,8 @@ class Model_Verden_Kpl_KplWebService {
 	
 	/**
 	 * Retorna todos os pedidos de venda atualizados ou inseridos a partir de uma determinada data
-	 * @param date dateUpdated Data para pesquisa
+	 * @param string $chaveIdentificacao
+	 * @throws RuntimeException
 	 */
 	public function PedidosDisponiveis($chaveIdentificacao) {
 		try {
@@ -479,7 +509,8 @@ class Model_Verden_Kpl_KplWebService {
 	
 	/**
 	 * Retorna todos os preços dos produto atualizados ou inseridos a partir de uma determinada data
-	 * @param date dateUpdated Data para pesquisa
+	 * @param string $chaveIdentificacao
+	 * @throws RuntimeException
 	 */
 	public function PrecosDisponiveis($chaveIdentificacao) {
 		try {
@@ -491,8 +522,23 @@ class Model_Verden_Kpl_KplWebService {
 	}
 	
 	/**
+	 * Retorna todos os status atualizados de um pedido
+	 * @param string $chaveIdentificacao
+	 * @throws RuntimeException
+	 */
+	public function statusPedidosDisponiveis($chaveIdentificacao) {
+		try {
+			// Recebe array com pedidos
+			return $this->_wsCall ( 'StatusPedidoDisponiveis', array ('ChaveIdentificacao' => $chaveIdentificacao ) );
+		} catch ( Exception $e ) {
+			throw new RuntimeException ( $e->getMessage () );
+		}
+	}
+	
+	/**
 	 * Retorna todos os estoques disponíveis
-	 * @param date dateUpdated Data para pesquisa
+	 * @param string $chaveIdentificacao
+	 * @throws RuntimeException
 	 */
 	public function EstoquesDisponiveis($chaveIdentificacao) {
 		try {

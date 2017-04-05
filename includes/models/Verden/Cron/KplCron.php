@@ -30,7 +30,7 @@ class Model_Verden_Cron_KplCron {
 	 * 
 	 * 
 	 */
-	public function AtualizaEstoqueKpl () {
+	public function atualizaEstoqueKpl () {
 
 		ini_set ( 'memory_limit', '512M' );
 		ini_set ( 'default_socket_timeout', 120 );		
@@ -67,127 +67,46 @@ class Model_Verden_Cron_KplCron {
 
 		echo "- Finalizando cron para atualizar estoque do Kpl" . PHP_EOL;
 	}
-
-	/**
-	 * 
-	 * Cadastrar fornecedores do Kpl.
-	 */
-	public function CadastraFornecedoresKpl () {
-
-		
-		if ( empty ( $this->_kpl ) ) {
-			$this->_kpl = new Model_Verden_Kpl_KplWebService ();
-		}
-		
-		echo "- importando Fornecedores do cliente Verden -  " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
-		
-		try {
-			$chaveIdentificacao = KPL_KEY;
-			
-			$fornecedores = $this->_kpl->FornecedoresDisponiveis ( $chaveIdentificacao );
-			if ( ! is_array ( $fornecedores ['FornecedoresDisponiveisResult'] ) ) {
-				throw new Exception ( 'Erro ao buscar Fornecedores' );
-			}
-			if ( $fornecedores ['FornecedoresDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
-				echo "Não existem fornecedores disponíveis para integração".PHP_EOL;
-			
-			}else{
-				$kpl_fornecedores = new Model_Verden_Kpl_Fornecedor ();
-					$retorno = $kpl_fornecedores->ProcessaFornecedoresWebservice ( $fornecedores ['FornecedoresDisponiveisResult'] );
-				}
-				echo "- importação de fornecedores do cliente Verden realizada com sucesso" . PHP_EOL;
-			
-		
-		} catch ( Exception $e ) {
-			echo "- erros ao importar os fornecedores do cliente Verden: " . $e->getMessage () . PHP_EOL;
-		}
-		unset ( $this->_kpl );
-		
-		
-		echo "- Finalizando cron para cadastrar fornecedores do Kpl" . PHP_EOL;
 	
-	}
-
 	/**
-	 * 
-	 * Cadastrar Notas Entrada do Kpl
+	 * Método para atualizar status de pedido da KPL para o Magento
 	 */
-	public function CadastraNotasEntradaKpl () {
-
-		ini_set ( 'memory_limit', '512M' );
+	public function atualizaStatusPedido(){
 		
-		if (empty ( $this->_kpl )) {
-			$this->_kpl = new Model_Wms_Kpl_KplWebService ( $cli_id );
-		}
-		
-		echo "- importando notas de entrada do cliente {$cli_id}, warehouse {$empwh_id} - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
-		try {
-			$chaveIdentificacao = KPL_KEY;
-			$notas_entrada = $this->_kpl->NotasFiscaisEntradaDisponiveis ( $chaveIdentificacao );
-			if ( ! is_array ( $notas_entrada ['NotasFiscaisEntradaDisponiveisResult'] ) ) {
-				throw new Exception ( 'Erro ao buscar notas de entrada' );
-			}
-			if ( $notas_entrada ['NotasFiscaisEntradaDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
-				echo "Não existem pedidos de entrada disponíveis para integração".PHP_EOL;
-				
-			}else{
-				$kpl_notas_entrada = new Model_Wms_Kpl_NotasEntrada ( $cli_id, $empwh_id );
-					$retorno = $kpl_notas_entrada->ProcessaNotasEntradaWebservice ( $notas_entrada ['NotasFiscaisEntradaDisponiveisResult'] );
-					
-					if(is_array($retorno)){
-						// gravar logs de erro						
-						$this->_log->gravaLogErros($cron_id, $retorno);	
-					}
-				}
-				
-		} catch ( Exception $e ) {
-			echo "- erros ao importar as notas de entrada do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
-		}
-		unset ( $this->_kpl );		
-	
-	}
-
-	/**
-	 * 
-	 * Cadastrar Pedidos Saida do Kpl
-	 */
-	public function CadastraPedidosSaidaKpl () {
-
 		ini_set ( 'memory_limit', '512M' );
 		
 		// Solicita Pedidos Saida Disponíveis
-			if ( empty ( $this->_kpl ) ) {
-				$this->_kpl = new Model_Verden_Kpl_KplWebService();
-			}
+		if ( empty ( $this->_kpl ) ) {
+			$this->_kpl = new Model_Verden_Kpl_KplWebService();
+		}
 			
-			echo "- importando pedidos de saída do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
-			try {
-				$chaveIdentificacao = KPL_KEY;
-				$pedidos_disponiveis = $this->_kpl->PedidosDisponiveis ( $chaveIdentificacao );
-				if ( ! is_array ( $pedidos_disponiveis ['PedidosDisponiveisResult'] ) ) {
-					throw new Exception ( 'Erro ao buscar notas de saída' );
-				}
-				if ( $pedidos_disponiveis ['PedidosDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
-					echo "Nao existem pedidos de saida disponiveis para integracao ".PHP_EOL;
-
-				}else{
-					$kpl = new Model_Verden_Kpl_Pedido();
-					$retorno = $kpl->ProcessaArquivoSaidaWebservice ( $pedidos_disponiveis ['PedidosDisponiveisResult'] );
-						if(is_array($retorno)){
-							// gravar logs de erro						
-							$this->_log->gravaLogErros($retorno);					
-						}	
-					}
-
-					echo "- importacao de pedidos do cliente Verden realizada com sucesso " . PHP_EOL;
-					
-			} catch ( Exception $e ) {
-				echo "- erros ao importar os pedidos de saída do cliente Verden: " . $e->getMessage () . PHP_EOL;
+		echo "- Atualizando status de pedidos de saida do cliente Verden - " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
+		try {
+			$chaveIdentificacao = KPL_KEY;
+			$status_disponiveis = $this->_kpl->statusPedidosDisponiveis($chaveIdentificacao);
+			if ( ! is_array ( $status_disponiveis ['StatusPedidoDisponiveisResult'] ) ) {
+				throw new Exception ( 'Erro ao buscar status dos pedidos' );
 			}
-			unset ( $this->_kpl );
+			if ( $status_disponiveis ['StatusPedidoDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003 ) {
+				echo "Nao existem status disponiveis para integracao ".PHP_EOL;
 		
-		echo "- Finalizando cron para cadastrar pedidos de saída da Kpl do cliente Verden " . PHP_EOL;
+			}else{
+				$kpl = new Model_Verden_Kpl_StatusPedido();
+				$retorno = $kpl->ProcessaStatusWebservice( $status_disponiveis ['StatusPedidoDisponiveisResult'] ['Rows'] );
+				if(is_array($retorno)){
+					// gravar logs de erro
+					$this->_log->gravaLogErros($retorno);
+				}
+			}
 		
+			echo "- importacao de status de pedidos do cliente Verden realizada com sucesso " . PHP_EOL;
+				
+		} catch ( Exception $e ) {
+			echo "- erros ao importar os status de pedidos de saída do cliente Verden: " . $e->getMessage () . PHP_EOL;
+		}
+		unset ( $this->_kpl );
+		
+		echo "- Finalizando cron para atualizar status de pedidos de saída da Kpl do cliente Verden " . PHP_EOL;
 	}
 
 	/**
@@ -195,7 +114,7 @@ class Model_Verden_Cron_KplCron {
 	 * Importa os produtos disponíveis.
 	 * @throws Exception
 	 */
-	public function CadastraProdutosKpl () {
+	public function cadastraProdutosKpl () {
 
 		ini_set ( 'memory_limit', '512M' );
 		ini_set ( 'default_socket_timeout', 120 );
@@ -242,7 +161,7 @@ class Model_Verden_Cron_KplCron {
 	 * Importa os preços disponíveis.
 	 * @throws Exception
 	 */
-	public function CadastraPrecosKpl () {
+	public function cadastraPrecosKpl () {
 	
 		ini_set ( 'memory_limit', '512M' );
 			
@@ -280,93 +199,4 @@ class Model_Verden_Cron_KplCron {
 		echo "- Finalizando cron para atualizar precos da Kpl" . PHP_EOL;
 	}
 	
-
-	/**
-	 * 
-	 * Importa as notas fiscais disponíveis.
-	 */
-	public function NotasFiscaisDisponiveis () {
-
-		ini_set ( 'memory_limit', '728M' );
-		//ini_set ( 'memory_limit', '-1' );
-		
-
-		foreach ( $this->_clientes as $indice => $cli_id ) {
-			
-			if ( empty ( $this->_kpl ) ) {
-				$this->_kpl = new Model_Wms_Kpl_KplWebService ( $cli_id );
-			}
-			
-			echo "- importando notas fiscais do cliente {$cli_id} " . date ( "d/m/Y H:i:s" ) . PHP_EOL;
-			$cron_id = $this->_log->getCronId('NotasFiscaisDisponiveis');
-			try {
-				$empwh_id = $this->_kpl->getArmazem ();
-				$chaveIdentificacao = $this->_kpl->getChaveIdentificacao ();
-				$notas_fiscais = $this->_kpl->NotasFiscaisSaidaDisponiveis ( $chaveIdentificacao );
-				if (! is_array ( $notas_fiscais ['NotasFiscaisSaidaDisponiveisResult'] )) {
-					throw new Exception ( 'Erro ao buscar Produtos' );
-				}
-				if ($notas_fiscais ['NotasFiscaisSaidaDisponiveisResult'] ['ResultadoOperacao'] ['Codigo'] == 200003) {
-					echo "Não existem notas disponíveis para integração".PHP_EOL;
-					
-				}else{
-					
-					if($cli_id == 78)
-					{
-						$ns = new Model_Wms_Kpl_PedidoGWBR( $cli_id, $empwh_id );
-						$ns->capturaDadosNf ( $notas_fiscais ['NotasFiscaisSaidaDisponiveisResult'] ['Rows'] );
-						
-					}
-					else
-					{
-						$ns = new Model_Wms_Kpl_Pedido ( $cli_id, $empwh_id );
-						$ns->capturaDadosNf ( $notas_fiscais ['NotasFiscaisSaidaDisponiveisResult'] ['Rows'] );
-						
-					}
-					
-					
-				}
-				
-			} catch ( Exception $e ) {
-				echo "- erros ao importar notas fiscais do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
-				$array_erro[] = "- erros ao importar notas fiscais do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
-			}
-			if(is_array($array_erro)){
-				// gravar logs de erro						
-				$this->_log->gravaLogErros($cron_id, $array_erro);					
-			}
-			unset ( $this->_kpl );
-		}
-		echo "- Finalizando cron para baixar notas fiscais disponíveis KPL" . PHP_EOL;
-	}
-	
-	/**
-	 *
-	 * Importa as notas fiscais disponíveis com pdf
-	 */
-	public function NotasFiscaisSaidaDisponiveisComPdf(){
-		foreach ( $this->_clientes as $indice => $cli_id ) {
-			// Inicialmente somente para Meu Espelho
-			if($cli_id==77){
-				
-				$this->_kpl = new Model_Wms_Kpl_KplWebService ( $cli_id );
-				echo "- importando notas fiscais do cliente {$cli_id} " .date("d/m/Y H:i:s"). PHP_EOL;
-				$cron_id = $this->_log->getCronId('NotasFiscaisSaidaDisponiveisComPdf');
-				try{	
-					$empwh_id = $this->_kpl->getArmazem ();
-					$pedido = new Model_Wms_Kpl_Pedido ( $cli_id, $empwh_id );
-					$pedido->NotasFiscaisSaidaDisponiveisComPdf();
-			
-				} catch ( Exception $e ) {
-						echo "- erros ao importar notas fiscais do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
-					$array_erro[] = "- erros ao importar notas fiscais do cliente {$cli_id}: " . $e->getMessage () . PHP_EOL;
-				}
-			}			
-			if(is_array($array_erro)){
-				// gravar logs de erro						
-				$this->_log->gravaLogErros($cron_id, $array_erro);					
-			}			
-		}
-		echo "- Finalizando cron para baixar notas fiscais disponíveis KPL" . PHP_EOL;
-	}
 }

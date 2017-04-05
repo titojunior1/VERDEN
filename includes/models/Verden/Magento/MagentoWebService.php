@@ -268,6 +268,27 @@ class Model_Verden_Magento_MagentoWebService {
 		}
 		
 	}
+	/**
+	 * Método para atualização de status de pedido
+	 * @param unknown $idProduto
+	 * @param unknown $produto
+	 * @return boolean
+	 */
+	public function atualizaStatusPedido( $idPedido, $status, $comentarioStatus){
+	
+		if($this->_session_valid == false){
+			$this->_iniciaSessao();
+		}
+	
+		try {
+	
+			$result = $this->_webservice->salesOrderAddComment( $this->_session, $idPedido, $status, $comentarioStatus );
+	
+		} catch (SoapFault $e) {
+			return false;
+		}
+	
+	}
 	
 	public function atualizaStatusPedidoemSeparacao( $idPedido ){
 	
